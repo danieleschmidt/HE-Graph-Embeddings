@@ -205,3 +205,50 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# CUDA
+*.cubin
+*.ptx
+*.fatbin
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+Testing/
+
+# Model files
+*.pth
+*.pt
+*.onnx
+models/
+checkpoints/
+
+# Data files
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.npy
+*.npz
+data/
+
+# CUDA profiling
+*.nsys-rep
+*.ncu-rep
+*.qdrep
+*.sqlite
+
+# Wandb
+wandb/
+
+# Tensorboard
+runs/
+
+# Secrets
+*.key
+*.pem
+*.crt
+secrets/
