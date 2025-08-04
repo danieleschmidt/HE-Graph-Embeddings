@@ -486,9 +486,9 @@ Apache License 2.0 - see [LICENSE](LICENSE) file.
 ```bibtex
 @software{he-graph-embeddings,
   title={HE-Graph-Embeddings: GPU-Accelerated Homomorphic Graph Neural Networks},
-  author={Your Name},
+  author={Daniel Schmidt},
   year={2025},
-  url={https://github.com/yourusername/HE-Graph-Embeddings}
+  url={https://github.com/danieleschmidt/HE-Graph-Embeddings}
 }
 ```
 
