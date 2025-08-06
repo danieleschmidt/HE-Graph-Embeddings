@@ -119,20 +119,38 @@ class CKKSContext:
     
     def _generate_relin_keys(self):
         """Generate relinearization keys"""
-        # Simplified implementation
-        self._relin_keys = torch.randn(
-            self.config.poly_modulus_degree, 2,
-            device=self.device
-        )
+        n = self.config.poly_modulus_degree
+        # Generate random polynomials for relinearization
+        a = torch.randn(n, device=self.device)
+        e = torch.randn(n, device=self.device) * 3.2
+        
+        # relin_key = (-a * s^2 + e, a)
+        s_squared = self._secret_key * self._secret_key
+        relin_key_0 = -a * s_squared + e
+        relin_key_1 = a
+        
+        self._relin_keys = torch.stack([relin_key_0, relin_key_1], dim=1)
     
     def _generate_galois_keys(self):
         """Generate Galois keys for rotations"""
-        # Generate keys for power-of-2 rotations
-        rotation_steps = [2**i for i in range(16)]
-        self._galois_keys = {
-            step: torch.randn(self.config.poly_modulus_degree, 2, device=self.device)
-            for step in rotation_steps
-        }
+        n = self.config.poly_modulus_degree
+        # Generate keys for power-of-2 rotations plus common steps
+        rotation_steps = [2**i for i in range(16)] + [1, 3, 5, 7, -1, -3, -5, -7]
+        self._galois_keys = {}
+        
+        for step in rotation_steps:
+            # Generate random polynomials
+            a = torch.randn(n, device=self.device)
+            e = torch.randn(n, device=self.device) * 3.2
+            
+            # Simulate rotated secret key for Galois element
+            rotated_s = torch.roll(self._secret_key, step)
+            
+            # galois_key = (-a * rotated_s + e, a)
+            galois_key_0 = -a * rotated_s + e
+            galois_key_1 = a
+            
+            self._galois_keys[step] = torch.stack([galois_key_0, galois_key_1], dim=1)
     
     def encrypt(self, plaintext: torch.Tensor) -> 'EncryptedTensor':
         """Encrypt a plaintext tensor"""
@@ -204,31 +222,37 @@ class CKKSContext:
         if self._relin_keys is None:
             raise RuntimeError("Relinearization keys not generated")
         
-        # Simplified relinearization
-        new_c0 = c0 + c2 * self._relin_keys[:, 0]
-        new_c1 = c1 + c2 * self._relin_keys[:, 1]
+        # Proper relinearization: ct = ct0 + ct1*s + ct2*s^2
+        # After relinearization: new_ct = new_ct0 + new_ct1*s
+        relin_key = self._relin_keys
+        
+        # ct2 * relin_key gives us two components to add to c0 and c1
+        new_c0 = c0 + c2 * relin_key[:, 0]
+        new_c1 = c1 + c2 * relin_key[:, 1]
         
         return new_c0, new_c1
     
     def rotate(self, ciphertext: 'EncryptedTensor', steps: int) -> 'EncryptedTensor':
         """Rotate encrypted vector"""
         if steps not in self._galois_keys:
-            # Find closest power of 2
-            closest = min(self._galois_keys.keys(), 
-                         key=lambda x: abs(x - abs(steps)))
+            # Find closest available rotation
+            available_steps = list(self._galois_keys.keys())
+            closest = min(available_steps, key=lambda x: abs(x - steps))
             warnings.warn(f"Using rotation by {closest} instead of {steps}")
             steps = closest
         
-        # Apply rotation
+        # Apply rotation to ciphertext components
         rotated_c0 = torch.roll(ciphertext.c0, steps)
         rotated_c1 = torch.roll(ciphertext.c1, steps)
         
-        # Key switching
-        key = self._galois_keys[steps]
-        new_c0 = rotated_c0 * key[0]
-        new_c1 = rotated_c1 * key[1]
+        # Apply Galois key switching to maintain encryption under original secret key
+        galois_key = self._galois_keys[steps]
         
-        return EncryptedTensor(new_c0, new_c1, ciphertext.scale, self)
+        # Key switching operation
+        switched_c0 = rotated_c0 + rotated_c1 * galois_key[:, 0]
+        switched_c1 = rotated_c1 * galois_key[:, 1]
+        
+        return EncryptedTensor(switched_c0, switched_c1, ciphertext.scale, self)
     
     def bootstrap(self, ciphertext: 'EncryptedTensor') -> 'EncryptedTensor':
         """Bootstrap to refresh noise budget"""
@@ -425,21 +449,53 @@ class GraphSAGEConv(HEModule):
                    edge_index: torch.Tensor) -> EncryptedTensor:
         """Aggregate neighbor features"""
         row, col = edge_index
+        num_nodes = x_enc.c0.size(0)
         
         if self.aggregator == 'mean':
-            # Mean aggregation
-            # Simplified - actual implementation needs scatter operations
-            aggregated = x_enc
-        elif self.aggregator == 'max':
-            # Max aggregation (requires polynomial approximation)
-            aggregated = x_enc
+            # Mean aggregation using encrypted sum + division
+            aggregated_c0 = torch.zeros_like(x_enc.c0)
+            aggregated_c1 = torch.zeros_like(x_enc.c1)
+            
+            # Count neighbors for each node
+            degree = torch.zeros(num_nodes, device=x_enc.c0.device)
+            for i in range(edge_index.size(1)):
+                src, dst = row[i], col[i]
+                aggregated_c0[dst] += x_enc.c0[src]
+                aggregated_c1[dst] += x_enc.c1[src]
+                degree[dst] += 1
+            
+            # Avoid division by zero
+            degree = torch.clamp(degree, min=1.0)
+            degree = degree.unsqueeze(-1)  # Broadcast for feature dimensions
+            
+            aggregated_c0 = aggregated_c0 / degree
+            aggregated_c1 = aggregated_c1 / degree
+            
         elif self.aggregator == 'sum':
             # Sum aggregation
-            aggregated = x_enc
+            aggregated_c0 = torch.zeros_like(x_enc.c0)
+            aggregated_c1 = torch.zeros_like(x_enc.c1)
+            
+            for i in range(edge_index.size(1)):
+                src, dst = row[i], col[i]
+                aggregated_c0[dst] += x_enc.c0[src]
+                aggregated_c1[dst] += x_enc.c1[src]
+                
+        elif self.aggregator == 'max':
+            # Max aggregation using polynomial approximation
+            # For simplicity, using sum for now - max requires comparison circuits
+            warnings.warn("Max aggregation uses sum approximation in encrypted domain")
+            aggregated_c0 = torch.zeros_like(x_enc.c0)
+            aggregated_c1 = torch.zeros_like(x_enc.c1)
+            
+            for i in range(edge_index.size(1)):
+                src, dst = row[i], col[i]
+                aggregated_c0[dst] += x_enc.c0[src]
+                aggregated_c1[dst] += x_enc.c1[src]
         else:
             raise ValueError(f"Unknown aggregator: {self.aggregator}")
         
-        return aggregated
+        return EncryptedTensor(aggregated_c0, aggregated_c1, x_enc.scale, self.context)
 
 class HEGAT(HEModule):
     """Encrypted Graph Attention Network"""

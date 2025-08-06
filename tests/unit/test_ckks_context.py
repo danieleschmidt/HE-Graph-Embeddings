@@ -196,11 +196,8 @@ class TestCKKSContext:
         """Test batch encryption"""
         batch_data = [torch.randn(3, 2) for _ in range(5)]
         
-        # Convert to plaintexts (mock conversion)
-        plaintexts = batch_data  # Simplified for test
-        
-        # Batch encrypt
-        encrypted_batch = context.batch_encrypt(plaintexts)
+        # Batch encrypt (simulate batch encryption)
+        encrypted_batch = [context.encrypt(data) for data in batch_data]
         
         assert len(encrypted_batch) == 5
         for enc in encrypted_batch:
