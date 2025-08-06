@@ -1,0 +1,557 @@
+# Quantum Task Planner - Production Helm Values
+# Global configuration for quantum-inspired task scheduling with privacy-preserving features
+
+global:
+  # Image registry configuration
+  imageRegistry: "ghcr.io"
+  imageRepository: "danieleschmidt"
+  imagePullSecrets: []
+  
+  # Global deployment settings
+  environment: "production"
+  region: "us-east-1"
+  clusterName: "quantum-planner-production"
+  
+  # Quantum optimization settings
+  quantumOptimization:
+    enabled: true
+    level: 3  # 1-5, higher = more aggressive optimization
+    coherenceTime: 300  # seconds
+    entanglementDepth: 5
+    
+  # Privacy and compliance
+  privacy:
+    homomorphicEncryption:
+      enabled: true
+      securityLevel: 128  # bits
+      polyModulusDegree: 32768
+    
+    compliance:
+      frameworks: ["GDPR", "CCPA", "HIPAA", "SOX"]
+      dataResidency: "regional"
+      auditLogging: true
+      
+  # Multi-region configuration  
+  multiRegion:
+    enabled: true
+    regions:
+      - name: "us-east-1"
+        primary: true
+        weight: 40
+      - name: "eu-west-1" 
+        primary: false
+        weight: 30
+      - name: "ap-northeast-1"
+        primary: false
+        weight: 30
+    
+    crossRegionReplication: true
+    failoverEnabled: true
+
+# API Service Configuration
+api:
+  enabled: true
+  
+  image:
+    repository: quantum-planner-api
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  
+  replicaCount: 3
+  
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+  
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/use-regex: "true"
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    hosts:
+      - host: api.quantum-planner.ai
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: quantum-planner-api-tls
+        hosts:
+          - api.quantum-planner.ai
+  
+  # Auto-scaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+    
+    # Quantum-specific scaling metrics
+    quantumMetrics:
+      enabled: true
+      targetQuantumLoad: 0.75
+      targetEntanglementEfficiency: 0.8
+  
+  # Resource configuration
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+      nvidia.com/gpu: "0"
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+      nvidia.com/gpu: "1"
+  
+  # Environment variables
+  env:
+    - name: QUANTUM_OPTIMIZATION_LEVEL
+      value: "3"
+    - name: HE_SECURITY_LEVEL
+      value: "128"
+    - name: ENABLE_QUANTUM_ACCELERATION
+      value: "true"
+    - name: LOG_LEVEL
+      value: "INFO"
+    - name: METRICS_ENABLED
+      value: "true"
+  
+  # Health checks
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: 8000
+    initialDelaySeconds: 15
+    periodSeconds: 5
+    timeoutSeconds: 3
+
+# Quantum Scheduler Service
+scheduler:
+  enabled: true
+  
+  image:
+    repository: quantum-planner-scheduler
+    tag: "1.0.0" 
+    pullPolicy: IfNotPresent
+  
+  replicaCount: 2
+  
+  # Scheduler-specific configuration
+  config:
+    schedulingInterval: 30  # seconds
+    quantumCoherenceTime: 300  # seconds
+    maxEntanglementDepth: 5
+    enableSuperposition: true
+    enableTunneling: true
+    enableInterferenceResolution: true
+  
+  resources:
+    requests:
+      cpu: "1000m"
+      memory: "2Gi"
+      nvidia.com/gpu: "0"
+    limits:
+      cpu: "4000m"
+      memory: "8Gi"
+      nvidia.com/gpu: "2"
+  
+  env:
+    - name: SCHEDULER_MODE
+      value: "quantum_optimized"
+    - name: ENABLE_DISTRIBUTED_SCHEDULING
+      value: "true"
+    - name: QUANTUM_ALGORITHM_SUITE
+      value: "advanced"
+
+# Resource Manager Service  
+resourceManager:
+  enabled: true
+  
+  image:
+    repository: quantum-planner-resource-manager
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+    
+  replicaCount: 2
+  
+  config:
+    monitoringInterval: 1  # seconds
+    quantumCoherenceTime: 600  # seconds
+    enableDistributed: true
+    autoScalingEnabled: true
+    
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+      
+  env:
+    - name: RESOURCE_OPTIMIZATION_LEVEL
+      value: "high"
+    - name: ENABLE_QUANTUM_RESOURCE_PREDICTION
+      value: "true"
+    - name: AUTO_SCALING_ENABLED
+      value: "true"
+
+# Frontend Service
+frontend:
+  enabled: true
+  
+  image:
+    repository: quantum-planner-frontend
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+    
+  replicaCount: 2
+  
+  service:
+    type: ClusterIP
+    port: 3000
+    
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    hosts:
+      - host: quantum-planner.ai
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: quantum-planner-frontend-tls
+        hosts:
+          - quantum-planner.ai
+          
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m" 
+      memory: "512Mi"
+
+# Database Configuration
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "changeme"
+    database: "quantum_planner"
+  
+  primary:
+    persistence:
+      enabled: true
+      size: "100Gi"
+      storageClass: "gp3"
+    
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "2000m"
+        memory: "4Gi"
+        
+  readReplicas:
+    replicaCount: 2
+    persistence:
+      enabled: true
+      size: "100Gi"
+      storageClass: "gp3"
+
+# Redis Configuration  
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: "changeme"
+    
+  master:
+    persistence:
+      enabled: true
+      size: "20Gi"
+      storageClass: "gp3"
+      
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "2Gi"
+        
+  replica:
+    replicaCount: 2
+    persistence:
+      enabled: true
+      size: "20Gi"
+      storageClass: "gp3"
+
+# Monitoring Configuration
+monitoring:
+  enabled: true
+  
+  prometheus:
+    enabled: true
+    retention: "30d"
+    storageClass: "gp3"
+    storageSize: "100Gi"
+    
+    # Quantum-specific metrics
+    quantumMetrics:
+      enabled: true
+      scrapeInterval: "15s"
+      
+      customMetrics:
+        - quantum_coherence_time
+        - quantum_entanglement_efficiency  
+        - quantum_speedup_factor
+        - homomorphic_encryption_overhead
+        - task_scheduling_latency
+        - resource_utilization_quantum
+  
+  grafana:
+    enabled: true
+    persistence:
+      enabled: true
+      size: "10Gi"
+      storageClass: "gp3"
+      
+    dashboards:
+      quantum_overview: true
+      task_scheduling: true
+      resource_management: true
+      privacy_compliance: true
+      performance_metrics: true
+      
+    datasources:
+      prometheus:
+        url: "http://prometheus:9090"
+      jaeger:
+        url: "http://jaeger-query:16686"
+  
+  jaeger:
+    enabled: true
+    storage:
+      type: "elasticsearch"
+      elasticsearch:
+        host: "elasticsearch"
+        port: 9200
+    
+    # Quantum tracing configuration
+    quantumTracing:
+      enabled: true
+      sampleRate: 0.1
+      traceQuantumOperations: true
+      
+  # Alerting configuration
+  alerting:
+    enabled: true
+    
+    rules:
+      - name: "quantum_coherence_low"
+        condition: "quantum_coherence_time < 0.2"
+        severity: "warning"
+        
+      - name: "quantum_speedup_degraded"
+        condition: "quantum_speedup_factor < 1.5"
+        severity: "warning"
+        
+      - name: "high_memory_usage"
+        condition: "memory_usage > 0.85"
+        severity: "critical"
+        
+      - name: "api_response_time_high"
+        condition: "api_response_time > 2s"
+        severity: "warning"
+
+# Security Configuration
+security:
+  enabled: true
+  
+  # Pod security standards
+  podSecurityStandards:
+    enforceLevel: "restricted"
+    auditLevel: "restricted" 
+    warnLevel: "restricted"
+    
+  # Network policies
+  networkPolicies:
+    enabled: true
+    defaultDeny: true
+    
+    policies:
+      - name: "api-to-scheduler"
+        source: "api"
+        destination: "scheduler"
+        ports: [8001]
+        
+      - name: "scheduler-to-resource-manager"  
+        source: "scheduler"
+        destination: "resource-manager"
+        ports: [8002]
+        
+      - name: "all-to-db"
+        source: "all"
+        destination: "postgresql"
+        ports: [5432]
+        
+      - name: "all-to-redis"
+        source: "all" 
+        destination: "redis"
+        ports: [6379]
+  
+  # Service mesh (Istio)
+  serviceMesh:
+    enabled: true
+    mtls: "STRICT"
+    
+    virtualServices:
+      - name: "quantum-api"
+        match:
+          - uri:
+              prefix: "/api"
+        route:
+          - destination:
+              host: "quantum-planner-api"
+              
+    destinationRules:
+      - name: "quantum-api-circuit-breaker"
+        host: "quantum-planner-api"
+        trafficPolicy:
+          outlierDetection:
+            consecutiveErrors: 3
+            interval: 30s
+            baseEjectionTime: 30s
+
+# Backup and Disaster Recovery
+backup:
+  enabled: true
+  
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  retention: "30d"
+  
+  destinations:
+    - type: "s3"
+      bucket: "quantum-planner-backups"
+      region: "us-east-1"
+      encryption: true
+      
+    - type: "gcs"
+      bucket: "quantum-planner-backups-gcs"
+      project: "quantum-planner-prod"
+      encryption: true
+  
+  # Cross-region replication
+  crossRegionBackup:
+    enabled: true
+    regions:
+      - "eu-west-1"
+      - "ap-northeast-1"
+
+# Development and Testing
+development:
+  enabled: false  # Set to true for development environments
+  
+  # Debug settings
+  debug:
+    enabled: false
+    logLevel: "DEBUG"
+    enableProfiler: false
+    
+  # Test data
+  testData:
+    enabled: false
+    generateSyntheticWorkload: false
+    
+# Feature Flags
+features:
+  quantumAcceleration: true
+  homomorphicEncryption: true
+  multiRegionDeployment: true
+  autoScaling: true
+  distributedScheduling: true
+  quantumResourceOptimization: true
+  advancedMonitoring: true
+  complianceLogging: true
+  experimentalFeatures: false
+
+# Node Selection and Affinity
+nodeSelection:
+  # Node selector for quantum-optimized nodes
+  nodeSelector:
+    node-type: "quantum-optimized"
+    
+  # Affinity rules
+  affinity:
+    # Prefer nodes with GPU for scheduler and resource manager
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: "accelerator"
+                operator: In
+                values: ["nvidia-tesla-v100", "nvidia-tesla-k80", "nvidia-tesla-t4"]
+    
+    # Anti-affinity to spread pods across nodes
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: "app.kubernetes.io/name"
+                  operator: In
+                  values: ["quantum-planner"]
+            topologyKey: "kubernetes.io/hostname"
+            
+  # Tolerations for dedicated quantum nodes
+  tolerations:
+    - key: "quantum-workload"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+    - key: "nvidia.com/gpu"
+      operator: "Exists"
+      effect: "NoSchedule"
+
+# Resource Quotas and Limits
+resourceQuotas:
+  enabled: true
+  
+  # Namespace-level quotas
+  namespaceQuota:
+    requests.cpu: "50"
+    requests.memory: "100Gi"
+    requests.nvidia.com/gpu: "10"
+    limits.cpu: "100"
+    limits.memory: "200Gi" 
+    limits.nvidia.com/gpu: "20"
+    persistentvolumeclaims: "50"
+    
+  # Pod-level limits
+  podLimits:
+    maxCpu: "8"
+    maxMemory: "16Gi"
+    maxGpu: "4"
