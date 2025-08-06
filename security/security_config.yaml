@@ -1,0 +1,165 @@
+# Security Policy Configuration for HE-Graph-Embeddings
+# Production-grade security settings
+
+# Maximum allowed findings per severity level
+max_findings:
+  critical: 0      # No critical findings allowed
+  high: 2          # Maximum 2 high-severity findings
+  medium: 5        # Maximum 5 medium-severity findings
+  low: 10          # Maximum 10 low-severity findings
+  info: 50         # Maximum 50 info-level findings
+
+# Blocked vulnerability types (CWE IDs)
+blocked_vulnerabilities:
+  - "CWE-89"       # SQL Injection
+  - "CWE-78"       # Command Injection
+  - "CWE-79"       # Cross-site Scripting (XSS)
+  - "CWE-22"       # Path Traversal
+  - "CWE-798"      # Hardcoded Credentials
+  - "CWE-502"      # Unsafe Deserialization
+  - "CWE-94"       # Code Injection
+
+# Security scanning configuration
+scan_config:
+  # File patterns to scan
+  include_patterns:
+    - "**/*.py"
+    - "**/*.js"
+    - "**/*.ts"
+    - "**/*.yaml"
+    - "**/*.yml"
+    - "**/*.json"
+    - "**/*.env"
+    - "**/*.cfg"
+    - "**/*.ini"
+    - "**/Dockerfile*"
+    - "**/requirements*.txt"
+
+  # File patterns to exclude
+  exclude_patterns:
+    - "**/venv/**"
+    - "**/node_modules/**"
+    - "**/.git/**"
+    - "**/__pycache__/**"
+    - "**/htmlcov/**"
+    - "**/logs/**"
+    - "**/security_reports/**"
+
+  # Maximum scan time (seconds)
+  max_scan_time: 600
+
+  # Enable deep AST analysis
+  deep_analysis: true
+
+  # Enable dependency vulnerability checking
+  check_dependencies: true
+
+  # Enable git history scanning
+  scan_git_history: false  # Disable for performance
+
+# Encryption security requirements
+encryption:
+  # Minimum security levels
+  min_security_bits: 128
+  min_poly_degree: 8192
+  max_coeff_modulus_bits: 438
+
+  # Key management
+  require_key_rotation: true
+  max_key_age_days: 90
+
+  # Noise budget monitoring
+  min_noise_budget: 5.0
+  noise_alert_threshold: 10.0
+
+# API security requirements
+api:
+  # Authentication
+  require_authentication: true
+  require_https: true
+  
+  # Rate limiting
+  max_requests_per_minute: 60
+  burst_limit: 10
+
+  # Request validation
+  max_request_size_mb: 100
+  require_content_type_validation: true
+
+  # Security headers
+  enforce_security_headers: true
+
+# Development vs Production settings
+environment_overrides:
+  development:
+    max_findings:
+      critical: 1    # Allow 1 critical in dev
+      high: 5        # More lenient in dev
+    allow_critical: true
+    require_https: false
+  
+  production:
+    max_findings:
+      critical: 0    # Strict in production
+      high: 0
+    allow_critical: false
+    require_https: true
+    require_key_rotation: true
+
+# Compliance requirements
+compliance:
+  # Data protection standards
+  gdpr_compliant: true
+  hipaa_compliant: true
+  pci_compliant: false
+
+  # Audit requirements
+  enable_audit_logging: true
+  log_retention_days: 365
+
+  # Cryptographic compliance
+  fips_140_2_level: 2
+  common_criteria_level: "EAL4+"
+
+# Alert and notification settings
+alerts:
+  # Webhook for critical findings
+  webhook_url: null  # Set in production
+
+  # Email notifications
+  email_recipients: []
+
+  # Slack integration
+  slack_webhook: null
+
+  # Alert thresholds
+  immediate_alert_severity: ["critical"]
+  daily_summary_severity: ["high", "medium"]
+
+# Remediation automation
+remediation:
+  # Auto-fix capabilities
+  enable_auto_fix: false
+  auto_fix_patterns:
+    - "hardcoded_secrets"
+    - "weak_crypto"
+
+  # Integration with CI/CD
+  fail_build_on_critical: true
+  fail_build_on_high: true
+  fail_build_on_security_regression: true
+
+# Reporting configuration
+reporting:
+  # Report formats
+  generate_html: true
+  generate_json: true
+  generate_sarif: false
+  generate_pdf: false
+
+  # Report distribution
+  upload_to_s3: false
+  s3_bucket: null
+  
+  # Report retention
+  retain_reports_days: 30
