@@ -1,0 +1,68 @@
+apiVersion: v2
+name: quantum-planner
+description: |
+  Quantum-Inspired Task Planner for Privacy-Preserving Graph Intelligence
+  
+  A production-grade Helm chart for deploying the Quantum Task Planner with:
+  - Homomorphic encryption for privacy-preserving computation
+  - Quantum-inspired scheduling algorithms
+  - Multi-region deployment support
+  - Auto-scaling and performance optimization
+  - Comprehensive monitoring and compliance
+
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+keywords:
+  - quantum-computing
+  - task-planning
+  - homomorphic-encryption  
+  - privacy-preserving
+  - graph-neural-networks
+  - scheduling
+  - optimization
+
+home: https://github.com/danieleschmidt/quantum-inspired-task-planner
+sources:
+  - https://github.com/danieleschmidt/quantum-inspired-task-planner
+
+maintainers:
+  - name: Daniel Schmidt
+    email: daniel@terragonlabs.ai
+    url: https://terragonlabs.ai
+
+annotations:
+  category: Analytics
+  licenses: Apache-2.0
+  images: |
+    - name: quantum-planner-api
+      image: ghcr.io/danieleschmidt/quantum-planner-api:1.0.0
+    - name: quantum-planner-scheduler  
+      image: ghcr.io/danieleschmidt/quantum-planner-scheduler:1.0.0
+    - name: quantum-planner-resource-manager
+      image: ghcr.io/danieleschmidt/quantum-planner-resource-manager:1.0.0
+    - name: quantum-planner-frontend
+      image: ghcr.io/danieleschmidt/quantum-planner-frontend:1.0.0
+
+dependencies:
+  - name: postgresql
+    version: "12.8.2"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: postgresql.enabled
+  - name: redis
+    version: "17.11.3"  
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: redis.enabled
+  - name: prometheus
+    version: "23.1.0"
+    repository: "https://prometheus-community.github.io/helm-charts"
+    condition: monitoring.prometheus.enabled
+  - name: grafana
+    version: "6.58.7"
+    repository: "https://grafana.github.io/helm-charts"
+    condition: monitoring.grafana.enabled
+  - name: jaeger
+    version: "0.71.11"
+    repository: "https://jaegertracing.github.io/helm-charts"
+    condition: monitoring.jaeger.enabled
