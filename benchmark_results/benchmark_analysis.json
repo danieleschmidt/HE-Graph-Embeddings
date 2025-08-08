@@ -1,0 +1,68 @@
+{
+  "overall_stats": {
+    "avg_improvement": 0.6443731391641868,
+    "best_method": "graph_aware_adaptive",
+    "total_benchmarks": 11
+  },
+  "method_stats": {
+    "graph_aware_adaptive": {
+      "avg_overhead_reduction": 0.6443731391641868,
+      "std_overhead_reduction": 0.10332049408591337,
+      "avg_packing_efficiency": 0.8013837748612285,
+      "avg_execution_time": 18.79329577265128,
+      "wins": 9,
+      "sample_size": 11
+    },
+    "spatial_locality_fixed": {
+      "avg_overhead_reduction": 0.5735833888995844,
+      "std_overhead_reduction": 0.0890827221678853,
+      "avg_packing_efficiency": 0.7235784137569999,
+      "avg_execution_time": 18.79329577265128,
+      "wins": 0,
+      "sample_size": 11
+    },
+    "community_aware_fixed": {
+      "avg_overhead_reduction": 0.5876944398906936,
+      "std_overhead_reduction": 0.0840739669883153,
+      "avg_packing_efficiency": 0.6856292827620689,
+      "avg_execution_time": 18.79329577265128,
+      "wins": 2,
+      "sample_size": 11
+    },
+    "naive_baseline": {
+      "avg_overhead_reduction": 0.09848817665591408,
+      "std_overhead_reduction": 0.004598838388991757,
+      "avg_packing_efficiency": 0.5124315480964623,
+      "avg_execution_time": 18.79329577265128,
+      "wins": 0,
+      "sample_size": 11
+    }
+  },
+  "strategy_stats": {
+    "community_aware": {
+      "avg_reduction": 0.7659730272397053,
+      "usage_count": 2,
+      "usage_percentage": 18.181818181818183
+    },
+    "spatial_locality": {
+      "avg_reduction": 0.66593796689393,
+      "usage_count": 4,
+      "usage_percentage": 36.36363636363637
+    },
+    "adaptive": {
+      "avg_reduction": 0.578481321750185,
+      "usage_count": 5,
+      "usage_percentage": 45.45454545454545
+    }
+  },
+  "benchmark_coverage": {
+    "graph_types": 11,
+    "size_range": "200-10000 nodes",
+    "feature_dimensions": [
+      64,
+      128,
+      256,
+      512
+    ]
+  }
+}
