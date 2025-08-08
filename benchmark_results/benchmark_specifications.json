@@ -1,0 +1,189 @@
+[
+  {
+    "name": "small_social_network",
+    "description": "Small social network with community structure",
+    "num_nodes": 500,
+    "num_edges": 1250,
+    "avg_degree": 5.0,
+    "clustering_coefficient": 0.3,
+    "density": 0.01,
+    "graph_type": "social",
+    "feature_dimension": 64,
+    "expected_optimal_strategy": "community_aware",
+    "performance_baseline": {
+      "naive_overhead": 85.0,
+      "expected_reduction": 0.74,
+      "target_efficiency": 0.85
+    }
+  },
+  {
+    "name": "small_knowledge_graph",
+    "description": "Dense knowledge graph with hierarchical structure",
+    "num_nodes": 300,
+    "num_edges": 2100,
+    "avg_degree": 14.0,
+    "clustering_coefficient": 0.45,
+    "density": 0.047,
+    "graph_type": "knowledge",
+    "feature_dimension": 128,
+    "expected_optimal_strategy": "spatial_locality",
+    "performance_baseline": {
+      "naive_overhead": 95.0,
+      "expected_reduction": 0.71,
+      "target_efficiency": 0.82
+    }
+  },
+  {
+    "name": "medium_financial_network",
+    "description": "Financial transaction network with scale-free properties",
+    "num_nodes": 2000,
+    "num_edges": 8000,
+    "avg_degree": 8.0,
+    "clustering_coefficient": 0.15,
+    "density": 0.004,
+    "graph_type": "financial",
+    "feature_dimension": 256,
+    "expected_optimal_strategy": "adaptive",
+    "performance_baseline": {
+      "naive_overhead": 110.0,
+      "expected_reduction": 0.68,
+      "target_efficiency": 0.78
+    }
+  },
+  {
+    "name": "medium_biological_network",
+    "description": "Protein-protein interaction network with modular structure",
+    "num_nodes": 1500,
+    "num_edges": 3750,
+    "avg_degree": 5.0,
+    "clustering_coefficient": 0.6,
+    "density": 0.003,
+    "graph_type": "biological",
+    "feature_dimension": 512,
+    "expected_optimal_strategy": "community_aware",
+    "performance_baseline": {
+      "naive_overhead": 75.0,
+      "expected_reduction": 0.76,
+      "target_efficiency": 0.88
+    }
+  },
+  {
+    "name": "large_social_media",
+    "description": "Large-scale social media network",
+    "num_nodes": 10000,
+    "num_edges": 50000,
+    "avg_degree": 10.0,
+    "clustering_coefficient": 0.25,
+    "density": 0.001,
+    "graph_type": "social_media",
+    "feature_dimension": 128,
+    "expected_optimal_strategy": "adaptive",
+    "performance_baseline": {
+      "naive_overhead": 120.0,
+      "expected_reduction": 0.65,
+      "target_efficiency": 0.75
+    }
+  },
+  {
+    "name": "large_supply_chain",
+    "description": "Global supply chain network with geographic clustering",
+    "num_nodes": 5000,
+    "num_edges": 15000,
+    "avg_degree": 6.0,
+    "clustering_coefficient": 0.4,
+    "density": 0.0012,
+    "graph_type": "supply_chain",
+    "feature_dimension": 64,
+    "expected_optimal_strategy": "spatial_locality",
+    "performance_baseline": {
+      "naive_overhead": 88.0,
+      "expected_reduction": 0.72,
+      "target_efficiency": 0.83
+    }
+  },
+  {
+    "name": "stress_dense_complete",
+    "description": "Dense complete graph (worst case for packing)",
+    "num_nodes": 200,
+    "num_edges": 19900,
+    "avg_degree": 199.0,
+    "clustering_coefficient": 1.0,
+    "density": 1.0,
+    "graph_type": "complete",
+    "feature_dimension": 128,
+    "expected_optimal_strategy": "adaptive",
+    "performance_baseline": {
+      "naive_overhead": 150.0,
+      "expected_reduction": 0.45,
+      "target_efficiency": 0.65
+    }
+  },
+  {
+    "name": "stress_sparse_ring",
+    "description": "Sparse ring graph (minimal connectivity)",
+    "num_nodes": 1000,
+    "num_edges": 1000,
+    "avg_degree": 2.0,
+    "clustering_coefficient": 0.0,
+    "density": 0.001,
+    "graph_type": "ring",
+    "feature_dimension": 256,
+    "expected_optimal_strategy": "spatial_locality",
+    "performance_baseline": {
+      "naive_overhead": 60.0,
+      "expected_reduction": 0.55,
+      "target_efficiency": 0.9
+    }
+  },
+  {
+    "name": "synthetic_erdos_renyi",
+    "description": "Erd\u0151s-R\u00e9nyi random graph",
+    "num_nodes": 1000,
+    "num_edges": 5000,
+    "avg_degree": 10.0,
+    "clustering_coefficient": 0.01,
+    "density": 0.01,
+    "graph_type": "random",
+    "feature_dimension": 128,
+    "expected_optimal_strategy": "adaptive",
+    "performance_baseline": {
+      "naive_overhead": 90.0,
+      "expected_reduction": 0.62,
+      "target_efficiency": 0.72
+    }
+  },
+  {
+    "name": "synthetic_barabasi_albert",
+    "description": "Barab\u00e1si-Albert preferential attachment graph",
+    "num_nodes": 2000,
+    "num_edges": 6000,
+    "avg_degree": 6.0,
+    "clustering_coefficient": 0.05,
+    "density": 0.003,
+    "graph_type": "scale_free",
+    "feature_dimension": 256,
+    "expected_optimal_strategy": "adaptive",
+    "performance_baseline": {
+      "naive_overhead": 85.0,
+      "expected_reduction": 0.7,
+      "target_efficiency": 0.8
+    }
+  },
+  {
+    "name": "synthetic_watts_strogatz",
+    "description": "Watts-Strogatz small-world graph",
+    "num_nodes": 1500,
+    "num_edges": 4500,
+    "avg_degree": 6.0,
+    "clustering_coefficient": 0.3,
+    "density": 0.004,
+    "graph_type": "small_world",
+    "feature_dimension": 128,
+    "expected_optimal_strategy": "spatial_locality",
+    "performance_baseline": {
+      "naive_overhead": 80.0,
+      "expected_reduction": 0.73,
+      "target_efficiency": 0.85
+    }
+  }
+]
