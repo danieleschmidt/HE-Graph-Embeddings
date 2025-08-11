@@ -1,0 +1,80 @@
+{
+  "timestamp": "2025-08-11T08:23:23.508823",
+  "overall_score": 0.8451191941893036,
+  "passed": false,
+  "execution_time": 0.4838531017303467,
+  "metrics": {
+    "code_quality": {
+      "score": 0.528453260373917,
+      "details": {
+        "complexity_score": 1.0,
+        "style_score": 0.3382352941176471,
+        "docstring_score": 0.7906976744186046,
+        "import_score": 0.18000000000000008,
+        "error_handling_score": 0.3333333333333333
+      },
+      "issues": [],
+      "recommendations": [
+        "Improve code complexity and maintainability",
+        "Standardize code formatting and style",
+        "Add comprehensive docstrings to functions and classes"
+      ]
+    },
+    "security": {
+      "score": 0.9375,
+      "details": {
+        "secrets_score": 1.0,
+        "validation_score": 0.9,
+        "crypto_score": 0.95,
+        "disclosure_score": 0.9
+      },
+      "issues": [],
+      "recommendations": []
+    },
+    "performance": {
+      "score": 0.8339285714285715,
+      "details": {
+        "algorithmic_complexity": 0.85,
+        "memory_efficiency": 0.8,
+        "io_efficiency": 0.9,
+        "concurrency_score": 0.7857142857142857
+      },
+      "issues": [],
+      "recommendations": []
+    },
+    "research": {
+      "score": 0.975,
+      "details": {
+        "reproducibility": 0.9,
+        "experimental_design": 1.0,
+        "statistical_validation": 1.0,
+        "novelty_score": 1.0
+      },
+      "issues": [],
+      "recommendations": []
+    },
+    "documentation": {
+      "score": 0.8958333333333333,
+      "details": {
+        "readme_quality": 0.9333333333333332,
+        "api_documentation": 0.9,
+        "code_comments": 0.85,
+        "examples_quality": 0.9
+      },
+      "issues": [],
+      "recommendations": [
+        "Improve documentation coverage and quality"
+      ]
+    },
+    "dependencies": {
+      "score": 0.9,
+      "details": {
+        "vulnerability_score": 0.9,
+        "license_compatibility": 0.95,
+        "dependency_freshness": 0.85
+      },
+      "issues": [],
+      "recommendations": []
+    }
+  }
+}
