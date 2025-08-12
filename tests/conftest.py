@@ -2,6 +2,7 @@
 Pytest configuration and shared fixtures
 """
 
+
 import pytest
 import torch
 import numpy as np
@@ -42,7 +43,7 @@ def sample_graph_data():
     return {
         "node_features": [
             [1.0, 2.0, 3.0],
-            [4.0, 5.0, 6.0], 
+            [4.0, 5.0, 6.0],
             [7.0, 8.0, 9.0],
             [10.0, 11.0, 12.0]
         ],
@@ -66,18 +67,18 @@ def large_graph_data():
     num_nodes = 1000
     feature_dim = 64
     num_edges = 5000
-    
+
     # Random node features
     node_features = np.random.randn(num_nodes, feature_dim).tolist()
-    
+
     # Random edges
     source_nodes = np.random.randint(0, num_nodes, num_edges).tolist()
     target_nodes = np.random.randint(0, num_nodes, num_edges).tolist()
     edge_index = [source_nodes, target_nodes]
-    
+
     # Random edge attributes
     edge_attributes = np.random.randn(num_edges, 1).tolist()
-    
+
     return {
         "node_features": node_features,
         "edge_index": edge_index,
@@ -94,15 +95,15 @@ def mock_cuda_available():
 def mock_cuda_enabled():
     """Mock CUDA as available and working"""
     with patch('torch.cuda.is_available', return_value=True), \
-         patch('torch.cuda.set_device'), \
-         patch('torch.cuda.get_device_properties') as mock_props:
-        
+        patch('torch.cuda.set_device'), \
+        patch('torch.cuda.get_device_properties') as mock_props:
+
         # Mock GPU properties
         mock_props.return_value.total_memory = 16 * 1024**3  # 16GB
         mock_props.return_value.name = "Tesla V100"
-        
+
         with patch('torch.cuda.current_device', return_value=0), \
-             patch('torch.cuda.device_count', return_value=1):
+            patch('torch.cuda.device_count', return_value=1):
             yield
 
 @pytest.fixture
@@ -135,8 +136,9 @@ def small_he_config():
 @pytest.fixture
 def mock_ckks_context(mock_cuda_available, mock_he_config):
     """Mock CKKS context for testing"""
+
     from src.python.he_graph import CKKSContext, HEConfig
-    
+
     config = HEConfig(**mock_he_config)
     context = CKKSContext(config)
     context.generate_keys()
@@ -146,13 +148,13 @@ def mock_ckks_context(mock_cuda_available, mock_he_config):
 def sample_encrypted_data(mock_ckks_context):
     """Sample encrypted data for testing"""
     context = mock_ckks_context
-    
+
     # Create sample plaintext data
     data = torch.randn(5, 3) * 0.1  # Small values to avoid overflow
-    
+
     # Encrypt
     encrypted = context.encrypt(data)
-    
+
     return {
         "plaintext": data,
         "encrypted": encrypted,
@@ -200,34 +202,41 @@ def api_auth_headers():
 @pytest.fixture
 def mock_api_client():
     """Mock API client for testing"""
+
     from fastapi.testclient import TestClient
     from src.api.routes import app
-    
+
     with patch('torch.cuda.is_available', return_value=False):
         client = TestClient(app)
         yield client
 
 class MockTensor:
     """Mock tensor for testing without actual PyTorch operations"""
-    
+
     def __init__(self, shape, dtype=torch.float32):
+        """  Init  ."""
         self.shape = shape
         self.dtype = dtype
         self.data = torch.zeros(shape, dtype=dtype)
-    
+
     def __add__(self, other):
+        """  Add  ."""
         return MockTensor(self.shape, self.dtype)
-    
+
     def __mul__(self, other):
+        """  Mul  ."""
         return MockTensor(self.shape, self.dtype)
-    
-    def to(self, device):
+
+    def to(self, device) -> None:
+        """To."""
         return self
-    
-    def cpu(self):
+
+    def cpu(self) -> None:
+        """Cpu."""
         return self
-    
-    def cuda(self):
+
+    def cuda(self) -> None:
+        """Cuda."""
         return self
 
 @pytest.fixture
@@ -239,29 +248,29 @@ def mock_tensor_factory():
 def generate_random_graph(num_nodes=10, num_edges=20, feature_dim=5):
     """Generate random graph for testing"""
     node_features = torch.randn(num_nodes, feature_dim)
-    
+
     # Generate random edges
     sources = torch.randint(0, num_nodes, (num_edges,))
     targets = torch.randint(0, num_nodes, (num_edges,))
     edge_index = torch.stack([sources, targets])
-    
+
     return node_features, edge_index
 
 def generate_chain_graph(num_nodes=5, feature_dim=3):
     """Generate chain graph for testing"""
     node_features = torch.randn(num_nodes, feature_dim)
-    
+
     # Create chain: 0-1-2-3-4
     sources = torch.arange(num_nodes - 1)
     targets = torch.arange(1, num_nodes)
     edge_index = torch.stack([sources, targets])
-    
+
     return node_features, edge_index
 
 def generate_complete_graph(num_nodes=4, feature_dim=2):
     """Generate complete graph for testing"""
     node_features = torch.randn(num_nodes, feature_dim)
-    
+
     # Create all possible edges
     sources = []
     targets = []
@@ -270,9 +279,9 @@ def generate_complete_graph(num_nodes=4, feature_dim=2):
             if i != j:
                 sources.append(i)
                 targets.append(j)
-    
+
     edge_index = torch.tensor([sources, targets])
-    
+
     return node_features, edge_index
 
 @pytest.fixture
@@ -288,45 +297,53 @@ def graph_generators():
 @pytest.fixture
 def performance_monitor():
     """Performance monitoring utility"""
+
     import time
     import psutil
     import threading
-    
+
     class PerformanceMonitor:
+        """PerformanceMonitor class."""
         def __init__(self):
+            """  Init  ."""
             self.start_time = None
             self.end_time = None
             self.memory_usage = []
             self.monitoring = False
-            
-        def start(self):
+
+        def start(self) -> None:
+            """Start."""
             self.start_time = time.time()
             self.monitoring = True
             self._monitor_thread = threading.Thread(target=self._monitor_memory)
             self._monitor_thread.start()
-            
-        def stop(self):
+
+        def stop(self) -> None:
+            """Stop."""
             self.end_time = time.time()
             self.monitoring = False
             if hasattr(self, '_monitor_thread'):
                 self._monitor_thread.join()
-            
-        def _monitor_memory(self):
+
+        def _monitor_memory(self) -> None:
+            """ Monitor Memory."""
             process = psutil.Process()
             while self.monitoring:
                 self.memory_usage.append(process.memory_info().rss / 1024 / 1024)  # MB
                 time.sleep(0.1)
-        
+
         @property
-        def elapsed_time(self):
+        def elapsed_time(self) -> None:
+            """Elapsed Time."""
             if self.start_time and self.end_time:
                 return self.end_time - self.start_time
             return None
-        
+
         @property
-        def peak_memory_mb(self):
+        def peak_memory_mb(self) -> None:
+            """Peak Memory Mb."""
             return max(self.memory_usage) if self.memory_usage else 0
-    
+
     return PerformanceMonitor
 
 # Error injection utilities
@@ -334,39 +351,43 @@ def performance_monitor():
 def error_injector():
     """Utility for injecting errors during testing"""
     class ErrorInjector:
+        """ErrorInjector class."""
         def __init__(self):
+            """  Init  ."""
             self.patches = []
-        
-        def inject_cuda_error(self):
+
+        def inject_cuda_error(self) -> None:
             """Inject CUDA unavailable error"""
             patcher = patch('torch.cuda.is_available', return_value=False)
             self.patches.append(patcher)
             return patcher.start()
-        
-        def inject_memory_error(self):
+
+        def inject_memory_error(self) -> None:
             """Inject memory error"""
             def memory_error(*args, **kwargs):
+                """Memory Error."""
                 raise MemoryError("Simulated memory error")
-            
+
             patcher = patch('torch.randn', side_effect=memory_error)
             self.patches.append(patcher)
             return patcher.start()
-        
-        def inject_value_error(self, target, message="Simulated value error"):
+
+        def inject_value_error(self, target, message="Simulated value error") -> None:
             """Inject value error"""
             def value_error(*args, **kwargs):
+                """Value Error."""
                 raise ValueError(message)
-            
+
             patcher = patch(target, side_effect=value_error)
             self.patches.append(patcher)
             return patcher.start()
-        
-        def cleanup(self):
+
+        def cleanup(self) -> None:
             """Cleanup all patches"""
             for patcher in self.patches:
                 patcher.stop()
             self.patches.clear()
-    
+
     injector = ErrorInjector()
     yield injector
     injector.cleanup()
@@ -376,29 +397,36 @@ def error_injector():
 def mock_database():
     """Mock database for testing"""
     class MockDatabase:
+        """MockDatabase class."""
         def __init__(self):
+            """  Init  ."""
             self.data = {}
             self.connected = False
-        
-        def connect(self):
+
+        def connect(self) -> None:
+            """Connect."""
             self.connected = True
-        
-        def disconnect(self):
+
+        def disconnect(self) -> None:
+            """Disconnect."""
             self.connected = False
-        
-        def store(self, key, value):
+
+        def store(self, key, value) -> None:
+            """Store."""
             if not self.connected:
                 raise RuntimeError("Not connected to database")
             self.data[key] = value
-        
-        def retrieve(self, key):
+
+        def retrieve(self, key) -> None:
+            """Retrieve."""
             if not self.connected:
                 raise RuntimeError("Not connected to database")
             return self.data.get(key)
-        
-        def clear(self):
+
+        def clear(self) -> None:
+            """Clear."""
             self.data.clear()
-    
+
     db = MockDatabase()
     db.connect()
     yield db
@@ -425,7 +453,7 @@ def pytest_runtest_setup(item):
     # Skip GPU tests if CUDA is not available
     if item.get_closest_marker("gpu") and not torch.cuda.is_available():
         pytest.skip("CUDA not available")
-    
+
     # Skip slow tests unless specifically requested
     if item.get_closest_marker("slow") and not item.config.getoption("--runslow"):
         pytest.skip("Slow test skipped (use --runslow to run)")

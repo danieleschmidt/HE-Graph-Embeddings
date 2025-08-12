@@ -1,6 +1,38 @@
 """
-Health check API endpoints for HE-Graph-Embeddings
+Health check API endpoints for HE-Graph-Embeddings.
+
+This module provides comprehensive health monitoring endpoints for the
+homomorphic encryption graph neural network service, including system metrics,
+application status, and Kubernetes-compatible probes.
+
+Classes:
+    None (FastAPI router-based module)
+
+Functions:
+    basic_health_check: Basic health status endpoint
+    detailed_health_check: Comprehensive system health with all subsystems
+    get_metrics: Current system performance metrics
+    get_system_status: Detailed system resource information
+    get_application_status: Application-specific status and context details
+    run_specific_check: Execute named health check
+    readiness_probe: Kubernetes readiness probe endpoint
+    liveness_probe: Kubernetes liveness probe endpoint
+    check_model_inference_health: Test model inference capability
+    check_encryption_performance: Test encryption/decryption performance
+    register_additional_checks: Register custom health checks
+
+Example:
+    Basic usage through FastAPI:
+    ```python
+
+    from fastapi import FastAPI
+    from .api.health import router as health_router
+
+    app = FastAPI()
+    app.include_router(health_router)
+    ```
 """
+
 
 import asyncio
 from datetime import datetime
@@ -18,11 +50,26 @@ router = APIRouter(prefix="/health", tags=["health"])
 
 @router.get("/", summary="Basic health check")
 @handle_exceptions(default_return=JSONResponse(
-    status_code=503, 
+    status_code=503,
     content={"status": "unhealthy", "message": "Health check failed"}
 ))
 async def basic_health_check():
-    """Basic health check endpoint"""
+    """
+    Basic health check endpoint.
+
+    Returns simple service status without detailed diagnostics.
+    Suitable for load balancer health checks.
+
+    Returns:
+        dict: Status response with timestamp and service identifier
+
+    Response format:
+        {
+            "status": "healthy",
+            "timestamp": "2024-01-15T10:30:00.000Z",
+            "service": "he-graph-embeddings"
+        }
+    """
     with log_context(operation="health_check_basic"):
         return {
             "status": "healthy",
@@ -39,16 +86,16 @@ async def detailed_health_check():
             health_checker = get_health_checker()
             if not health_checker:
                 raise HEGraphError("Health checker not initialized")
-            
+
             # Run all health checks
             results = await health_checker.run_health_checks()
             overall_status = health_checker.get_overall_status(results)
-            
+
             # Convert results to JSON-serializable format
             formatted_results = {
                 name: result.to_dict() for name, result in results.items()
             }
-            
+
             # Determine HTTP status code
             status_code = 200
             if overall_status == HealthStatus.CRITICAL:
@@ -57,7 +104,7 @@ async def detailed_health_check():
                 status_code = 503
             elif overall_status == HealthStatus.DEGRADED:
                 status_code = 200  # Still serving requests
-            
+
             response_data = {
                 "overall_status": overall_status.value,
                 "timestamp": datetime.utcnow().isoformat(),
@@ -70,14 +117,14 @@ async def detailed_health_check():
                     "critical": sum(1 for r in results.values() if r.status == HealthStatus.CRITICAL)
                 }
             }
-            
+
             logger.info(f"Health check completed: {overall_status.value}")
-            
+
             return JSONResponse(
                 status_code=status_code,
                 content=response_data
             )
-            
+
         except Exception as e:
             logger.error(f"Detailed health check failed: {e}")
             raise HTTPException(status_code=503, detail=f"Health check failed: {str(e)}")
@@ -91,14 +138,14 @@ async def get_metrics():
             health_checker = get_health_checker()
             if not health_checker:
                 raise HEGraphError("Health checker not initialized")
-            
+
             metrics = {}
             collector = health_checker.metric_collector
-            
+
             # Common metric names to report
             metric_names = [
                 "cpu.usage_percent",
-                "memory.usage_percent", 
+                "memory.usage_percent",
                 "memory.available_gb",
                 "disk.usage_percent",
                 "gpu.memory_allocated_gb",
@@ -108,7 +155,7 @@ async def get_metrics():
                 "encryption.encrypt_duration_ms",
                 "encryption.decrypt_duration_ms"
             ]
-            
+
             for metric_name in metric_names:
                 latest = collector.get_latest(metric_name)
                 if latest is not None:
@@ -117,12 +164,12 @@ async def get_metrics():
                         "avg_5min": collector.get_average(metric_name, 5),
                         "p95_5min": collector.get_percentile(metric_name, 95, 5)
                     }
-            
+
             return {
                 "timestamp": datetime.utcnow().isoformat(),
                 "metrics": metrics
             }
-            
+
         except Exception as e:
             logger.error(f"Metrics retrieval failed: {e}")
             raise HTTPException(status_code=500, detail=f"Metrics retrieval failed: {str(e)}")
@@ -134,14 +181,14 @@ async def get_system_status():
         try:
             health_checker = get_health_checker()
             system_health = health_checker.system_monitor.get_system_health()
-            
+
             # Additional system info
             system_info = {
                 "pytorch_version": torch.__version__,
                 "cuda_available": torch.cuda.is_available(),
                 "cuda_device_count": torch.cuda.device_count() if torch.cuda.is_available() else 0,
             }
-            
+
             if torch.cuda.is_available():
                 system_info.update({
                     "cuda_device_name": torch.cuda.get_device_name(0),
@@ -149,13 +196,13 @@ async def get_system_status():
                     "cuda_memory_allocated": torch.cuda.memory_allocated() // (1024**3),
                     "cuda_memory_cached": torch.cuda.memory_reserved() // (1024**3)
                 })
-            
+
             return {
                 "timestamp": datetime.utcnow().isoformat(),
                 "health": system_health.to_dict(),
                 "system_info": system_info
             }
-            
+
         except Exception as e:
             logger.error(f"System status check failed: {e}")
             raise HTTPException(status_code=500, detail=f"System status check failed: {str(e)}")
@@ -167,7 +214,7 @@ async def get_application_status():
         try:
             health_checker = get_health_checker()
             app_health = health_checker.app_monitor.get_application_health()
-            
+
             # Additional application info
             app_info = {
                 "active_contexts": len(health_checker.app_monitor.active_contexts),
@@ -191,13 +238,13 @@ async def get_application_status():
                     for name, info in health_checker.app_monitor.active_models.items()
                 }
             }
-            
+
             return {
                 "timestamp": datetime.utcnow().isoformat(),
                 "health": app_health.to_dict(),
                 "application_info": app_info
             }
-            
+
         except Exception as e:
             logger.error(f"Application status check failed: {e}")
             raise HTTPException(status_code=500, detail=f"Application status check failed: {str(e)}")
@@ -208,24 +255,24 @@ async def run_specific_check(check_name: str):
     with log_context(operation=f"health_check_{check_name}"):
         try:
             health_checker = get_health_checker()
-            
+
             if check_name not in health_checker.health_checks:
                 available_checks = list(health_checker.health_checks.keys()) + ["system", "application"]
                 raise HTTPException(
-                    status_code=404, 
+                    status_code=404,
                     detail=f"Health check '{check_name}' not found. Available: {available_checks}"
                 )
-            
+
             # Run specific check
             check_func = health_checker.health_checks[check_name]
             result = check_func()
-            
+
             return {
                 "timestamp": datetime.utcnow().isoformat(),
                 "check_name": check_name,
                 "result": result.to_dict()
             }
-            
+
         except HTTPException:
             raise
         except Exception as e:
@@ -240,7 +287,7 @@ async def readiness_probe():
             health_checker = get_health_checker()
             results = await health_checker.run_health_checks()
             overall_status = health_checker.get_overall_status(results)
-            
+
             # Service is ready if not critical
             if overall_status == HealthStatus.CRITICAL:
                 return JSONResponse(
@@ -251,13 +298,13 @@ async def readiness_probe():
                         "message": "Service not ready due to critical issues"
                     }
                 )
-            
+
             return {
                 "ready": True,
                 "status": overall_status.value,
                 "timestamp": datetime.utcnow().isoformat()
             }
-            
+
         except Exception as e:
             logger.error(f"Readiness probe failed: {e}")
             return JSONResponse(
@@ -277,13 +324,13 @@ async def liveness_probe():
             # Test basic tensor operations
             test_tensor = torch.randn(10, 10)
             _ = test_tensor.sum()
-            
+
             return {
                 "alive": True,
                 "timestamp": datetime.utcnow().isoformat(),
                 "service": "he-graph-embeddings"
             }
-            
+
         except Exception as e:
             logger.critical(f"Liveness probe failed: {e}")
             return JSONResponse(
@@ -297,21 +344,39 @@ async def liveness_probe():
 # Custom health checks that can be registered
 
 async def check_model_inference_health() -> HealthCheckResult:
-    """Health check for model inference capability"""
+    """
+    Health check for model inference capability.
+
+    Tests basic PyTorch tensor operations to verify model inference
+    infrastructure is functional.
+
+    Returns:
+        HealthCheckResult: Result with status and diagnostic details
+
+    Test details:
+        - Creates random test tensor
+        - Applies ReLU activation function
+        - Verifies tensor operations complete successfully
+
+    Status levels:
+        - HEALTHY: All tensor operations successful
+        - CRITICAL: PyTorch operations failed
+    """
     try:
         # This would test basic model inference
         # For now, just verify PyTorch is working
         test_tensor = torch.randn(5, 10)
         result = torch.nn.functional.relu(test_tensor)
-        
+
         return HealthCheckResult(
             name="model_inference",
             status=HealthStatus.HEALTHY,
             message="Model inference capability working",
             details={"test_shape": list(test_tensor.shape)}
         )
-        
+
     except Exception as e:
+        logger.error(f"Error in operation: {e}")
         return HealthCheckResult(
             name="model_inference",
             status=HealthStatus.CRITICAL,
@@ -321,24 +386,25 @@ async def check_model_inference_health() -> HealthCheckResult:
 async def check_encryption_performance() -> HealthCheckResult:
     """Health check for encryption performance"""
     try:
+
         import time
         from ..python.he_graph import CKKSContext, HEConfig
-        
+
         # Quick performance test
         config = HEConfig(poly_modulus_degree=4096)  # Small for quick test
         context = CKKSContext(config)
         context.generate_keys()
-        
+
         test_data = torch.randn(10, 5)
-        
+
         start_time = time.time()
         encrypted = context.encrypt(test_data)
         encryption_time = time.time() - start_time
-        
+
         start_time = time.time()
         decrypted = context.decrypt(encrypted)
         decryption_time = time.time() - start_time
-        
+
         # Performance thresholds
         if encryption_time > 1.0:  # 1 second
             status = HealthStatus.DEGRADED
@@ -349,7 +415,7 @@ async def check_encryption_performance() -> HealthCheckResult:
         else:
             status = HealthStatus.HEALTHY
             message = f"Encryption performance good: {encryption_time:.3f}s"
-        
+
         return HealthCheckResult(
             name="encryption_performance",
             status=status,
@@ -360,8 +426,9 @@ async def check_encryption_performance() -> HealthCheckResult:
                 "test_data_shape": list(test_data.shape)
             }
         )
-        
+
     except Exception as e:
+        logger.error(f"Error in operation: {e}")
         return HealthCheckResult(
             name="encryption_performance",
             status=HealthStatus.CRITICAL,
@@ -375,7 +442,7 @@ def register_additional_checks():
     if health_checker:
         # These are async functions, so they need wrapper functions
         health_checker.register_health_check(
-            "model_inference", 
+            "model_inference",
             lambda: asyncio.run(check_model_inference_health())
         )
         health_checker.register_health_check(

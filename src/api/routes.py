@@ -2,6 +2,7 @@
 FastAPI routes for HE-Graph-Embeddings API server
 """
 
+
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -53,15 +54,15 @@ models: Dict[str, Any] = {}
 async def startup_event():
     """Initialize application on startup"""
     logger.info("Starting HE-Graph-Embeddings API server")
-    
+
     # Initialize default CKKS context
     default_config = HEConfig()
     contexts["default"] = CKKSContext(default_config)
     contexts["default"].generate_keys()
-    
+
     logger.info("Default CKKS context initialized")
 
-@app.on_event("shutdown") 
+@app.on_event("shutdown")
 async def shutdown_event():
     """Cleanup on shutdown"""
     logger.info("Shutting down HE-Graph-Embeddings API server")
@@ -93,7 +94,7 @@ async def detailed_health():
             "memory_allocated": torch.cuda.memory_allocated(),
             "memory_cached": torch.cuda.memory_reserved()
         }
-    
+
     return {
         "status": "healthy",
         "timestamp": datetime.utcnow(),
@@ -113,10 +114,10 @@ async def create_context(context_name: str, config: HEConfig):
         context = CKKSContext(config)
         context.generate_keys()
         contexts[context_name] = context
-        
+
         logger.info(f"Created context: {context_name}")
         return {"message": f"Context {context_name} created successfully"}
-    
+
     except Exception as e:
         logger.error(f"Failed to create context {context_name}: {e}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -140,10 +141,10 @@ async def delete_context(context_name: str):
     """Delete a context"""
     if context_name == "default":
         raise HTTPException(status_code=400, detail="Cannot delete default context")
-    
+
     if context_name not in contexts:
         raise HTTPException(status_code=404, detail="Context not found")
-    
+
     del contexts[context_name]
     logger.info(f"Deleted context: {context_name}")
     return {"message": f"Context {context_name} deleted"}
@@ -158,9 +159,9 @@ async def create_model(
     """Create and train a new model"""
     if context_name not in contexts:
         raise HTTPException(status_code=404, detail="Context not found")
-    
+
     context = contexts[context_name]
-    
+
     try:
         if request.model_type == "graphsage":
             model = HEGraphSAGE(
@@ -181,17 +182,17 @@ async def create_model(
             )
         else:
             raise ValueError(f"Unsupported model type: {request.model_type}")
-        
+
         models[model_name] = {
             "model": model,
             "context_name": context_name,
             "config": request,
             "created_at": datetime.utcnow()
         }
-        
+
         logger.info(f"Created model: {model_name}")
         return {"message": f"Model {model_name} created successfully"}
-    
+
     except Exception as e:
         logger.error(f"Failed to create model {model_name}: {e}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -215,7 +216,7 @@ async def delete_model(model_name: str):
     """Delete a model"""
     if model_name not in models:
         raise HTTPException(status_code=404, detail="Model not found")
-    
+
     del models[model_name]
     logger.info(f"Deleted model: {model_name}")
     return {"message": f"Model {model_name} deleted"}
@@ -229,20 +230,20 @@ async def encrypt_data(
     """Encrypt graph data"""
     if context_name not in contexts:
         raise HTTPException(status_code=404, detail="Context not found")
-    
+
     context = contexts[context_name]
-    
+
     try:
         # Convert input to tensors
         features = torch.tensor(request.node_features, dtype=torch.float32)
         edge_index = torch.tensor(request.edge_index, dtype=torch.long)
-        
+
         # Encrypt features
         encrypted_features = context.encrypt(features)
-        
+
         # Store encrypted data (in production, use proper storage)
         encryption_id = f"enc_{datetime.utcnow().isoformat()}"
-        
+
         return {
             "encryption_id": encryption_id,
             "encrypted_shape": features.shape,
@@ -250,7 +251,7 @@ async def encrypt_data(
             "scale": encrypted_features.scale,
             "noise_budget": encrypted_features.noise_budget
         }
-    
+
     except Exception as e:
         logger.error(f"Encryption failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -265,36 +266,36 @@ async def run_inference(
     """Run inference on encrypted data"""
     if model_name not in models:
         raise HTTPException(status_code=404, detail="Model not found")
-    
+
     model_info = models[model_name]
     model = model_info["model"]
     context = contexts[model_info["context_name"]]
-    
+
     try:
         # Convert input data
         features = torch.tensor(request.node_features, dtype=torch.float32)
         edge_index = torch.tensor(request.edge_index, dtype=torch.long)
-        
+
         # Encrypt input
         encrypted_features = context.encrypt(features)
-        
+
         # Run inference
         with torch.no_grad():
             encrypted_output = model(encrypted_features, edge_index)
-        
+
         # Store results (in production, use proper storage)
         inference_id = f"inf_{datetime.utcnow().isoformat()}"
-        
+
         # Background task for cleanup
         background_tasks.add_task(cleanup_inference_data, inference_id)
-        
+
         return {
             "inference_id": inference_id,
             "output_shape": encrypted_output.c0.shape,
             "noise_budget": encrypted_output.noise_budget,
             "processing_time": "computed_in_background"
         }
-    
+
     except Exception as e:
         logger.error(f"Inference failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -307,7 +308,7 @@ async def decrypt_data(
     """Decrypt data (for testing/verification only)"""
     if context_name not in contexts:
         raise HTTPException(status_code=404, detail="Context not found")
-    
+
     # In production, this would retrieve stored encrypted data
     # This is a simplified example
     return {
@@ -325,24 +326,24 @@ async def encrypt_batch(
     """Encrypt multiple graphs in batch"""
     if context_name not in contexts:
         raise HTTPException(status_code=404, detail="Context not found")
-    
+
     context = contexts[context_name]
     results = []
-    
+
     try:
         for i, request in enumerate(requests):
             features = torch.tensor(request.node_features, dtype=torch.float32)
             encrypted_features = context.encrypt(features)
-            
+
             results.append({
                 "batch_index": i,
                 "encryption_id": f"batch_enc_{i}_{datetime.utcnow().isoformat()}",
                 "encrypted_shape": features.shape,
                 "noise_budget": encrypted_features.noise_budget
             })
-        
+
         return {"batch_results": results}
-    
+
     except Exception as e:
         logger.error(f"Batch encryption failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -352,22 +353,23 @@ async def encrypt_batch(
 async def estimate_security(config: HEConfig):
     """Estimate security level for given parameters"""
     from ..python.he_graph import SecurityEstimator
-    
+
     try:
         params = {
             "poly_degree": config.poly_modulus_degree,
             "coeff_modulus_bits": config.coeff_modulus_bits
         }
-        
+
         security_bits = SecurityEstimator.estimate(params)
-        
+
         return {
             "security_bits": security_bits,
             "parameters": params,
             "recommendation": "acceptable" if security_bits >= 128 else "insufficient"
         }
-    
+
     except Exception as e:
+        logger.error(f"Error in operation: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/performance/benchmark")
@@ -378,20 +380,21 @@ async def run_benchmark():
         config = HEConfig(poly_modulus_degree=16384)  # Smaller for quick test
         context = CKKSContext(config)
         context.generate_keys()
-        
+
         # Benchmark encryption
+
         import time
         data = torch.randn(100, 64)
-        
+
         start_time = time.time()
         encrypted = context.encrypt(data)
         encrypt_time = time.time() - start_time
-        
+
         # Benchmark addition
         start_time = time.time()
         result = context.add(encrypted, encrypted)
         add_time = time.time() - start_time
-        
+
         return {
             "benchmark_results": {
                 "data_size": data.shape,
@@ -404,7 +407,7 @@ async def run_benchmark():
                 "security_level": config.security_level
             }
         }
-    
+
     except Exception as e:
         logger.error(f"Benchmark failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))

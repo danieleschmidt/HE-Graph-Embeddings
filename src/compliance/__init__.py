@@ -19,7 +19,7 @@ from .compliance_manager import (
 
 __all__ = [
     'ComplianceFramework',
-    'DataCategory', 
+    'DataCategory',
     'ConsentType',
     'ProcessingPurpose',
     'DataSubject',

@@ -1,13 +1,13 @@
 """
 Multi-region deployment package for HE-Graph-Embeddings
 
-Provides global deployment capabilities with intelligent routing, 
+Provides global deployment capabilities with intelligent routing,
 compliance management, and failover functionality.
 """
 
 from .multi_region import (
     Region,
-    RegionConfig, 
+    RegionConfig,
     MultiRegionManager,
     DataResidencyManager,
     multi_region_manager,
@@ -25,12 +25,12 @@ from .region_router import (
 __all__ = [
     'Region',
     'RegionConfig',
-    'MultiRegionManager', 
+    'MultiRegionManager',
     'DataResidencyManager',
     'multi_region_manager',
     'data_residency_manager',
     'RoutingStrategy',
-    'RoutingRequest', 
+    'RoutingRequest',
     'RoutingResponse',
     'RegionalRouter',
     'RegionFailoverManager'

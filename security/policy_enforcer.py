@@ -3,6 +3,7 @@ Security Policy Enforcer for HE-Graph-Embeddings
 Production-grade security policy validation and enforcement
 """
 
+
 import yaml
 import logging
 import os
@@ -38,35 +39,36 @@ class ComplianceStatus:
 
 class SecurityPolicyEnforcer:
     """Enforce security policies and compliance requirements"""
-    
+
     def __init__(self, config_path: str = None):
+        """  Init  ."""
         self.config_path = config_path or os.path.join(
             os.path.dirname(__file__), "security_config.yaml"
         )
         self.config = self._load_config()
         self.violations = []
-    
+
     def _load_config(self) -> Dict[str, Any]:
         """Load security policy configuration"""
         try:
             with open(self.config_path, 'r') as f:
                 config = yaml.safe_load(f)
-                
+
             # Apply environment-specific overrides
             environment = os.getenv('ENVIRONMENT', 'development')
             if environment in config.get('environment_overrides', {}):
                 overrides = config['environment_overrides'][environment]
                 config = self._merge_config(config, overrides)
-            
+
             return config
-            
+
         except FileNotFoundError:
             logger.error(f"Security config file not found: {self.config_path}")
             return self._get_default_config()
         except yaml.YAMLError as e:
             logger.error(f"Error parsing security config: {e}")
             return self._get_default_config()
-    
+
     def _merge_config(self, base: Dict, overrides: Dict) -> Dict:
         """Merge configuration with environment overrides"""
         result = base.copy()
@@ -76,7 +78,7 @@ class SecurityPolicyEnforcer:
             else:
                 result[key] = value
         return result
-    
+
     def _get_default_config(self) -> Dict[str, Any]:
         """Get default security configuration"""
         return {
@@ -99,11 +101,11 @@ class SecurityPolicyEnforcer:
                 'require_https': True
             }
         }
-    
+
     def validate_security_report(self, report: SecurityReport) -> ComplianceStatus:
         """Validate security scan report against policies"""
         violations = []
-        
+
         # Check finding count limits
         max_findings = self.config.get('max_findings', {})
         for severity, max_count in max_findings.items():
@@ -117,7 +119,7 @@ class SecurityPolicyEnforcer:
                     remediation=f"Reduce {severity} findings to {max_count} or below",
                     finding_ids=[f.id for f in report.findings if f.severity.value == severity]
                 ))
-        
+
         # Check for blocked vulnerability types
         blocked_vulns = self.config.get('blocked_vulnerabilities', [])
         for finding in report.findings:
@@ -130,7 +132,7 @@ class SecurityPolicyEnforcer:
                     remediation=f"Fix or mitigate {finding.cwe_id} vulnerability in {finding.file_path}",
                     finding_ids=[finding.id]
                 ))
-        
+
         # Check critical findings policy
         critical_findings = [f for f in report.findings if f.severity == SecurityLevel.CRITICAL]
         if critical_findings and not self.config.get('allow_critical', False):
@@ -142,10 +144,10 @@ class SecurityPolicyEnforcer:
                 remediation="Fix all critical security findings",
                 finding_ids=[f.id for f in critical_findings]
             ))
-        
+
         # Calculate compliance score
         score = self._calculate_compliance_score(report, violations)
-        
+
         return ComplianceStatus(
             compliant=len(violations) == 0,
             violations=violations,
@@ -157,11 +159,11 @@ class SecurityPolicyEnforcer:
                 'scan_id': report.scan_id
             }
         )
-    
+
     def _calculate_compliance_score(self, report: SecurityReport, violations: List[PolicyViolation]) -> float:
         """Calculate compliance score (0-100)"""
         base_score = 100.0
-        
+
         # Deduct points for violations
         for violation in violations:
             if violation.severity == 'critical':
@@ -172,7 +174,7 @@ class SecurityPolicyEnforcer:
                 base_score -= 5
             else:
                 base_score -= 1
-        
+
         # Deduct points for findings
         for severity, count in report.summary.items():
             if severity == 'critical':
@@ -183,14 +185,14 @@ class SecurityPolicyEnforcer:
                 base_score -= count * 1
             elif severity == 'low':
                 base_score -= count * 0.5
-        
+
         return max(0.0, min(100.0, base_score))
-    
+
     def validate_encryption_config(self, config: Dict[str, Any]) -> List[PolicyViolation]:
         """Validate encryption configuration against policy"""
         violations = []
         encryption_policy = self.config.get('encryption', {})
-        
+
         # Check minimum security bits
         min_security_bits = encryption_policy.get('min_security_bits', 128)
         if config.get('security_level', 0) < min_security_bits:
@@ -202,7 +204,7 @@ class SecurityPolicyEnforcer:
                 remediation=f"Use at least {min_security_bits}-bit security level",
                 finding_ids=[]
             ))
-        
+
         # Check polynomial degree
         min_poly_degree = encryption_policy.get('min_poly_degree', 8192)
         if config.get('poly_modulus_degree', 0) < min_poly_degree:
@@ -214,7 +216,7 @@ class SecurityPolicyEnforcer:
                 remediation=f"Use polynomial degree of at least {min_poly_degree}",
                 finding_ids=[]
             ))
-        
+
         # Check coefficient modulus size
         max_coeff_bits = encryption_policy.get('max_coeff_modulus_bits', 438)
         coeff_bits = sum(config.get('coeff_modulus_bits', []))
@@ -227,14 +229,14 @@ class SecurityPolicyEnforcer:
                 remediation=f"Reduce coefficient modulus to {max_coeff_bits} bits or less",
                 finding_ids=[]
             ))
-        
+
         return violations
-    
+
     def validate_api_security(self, app_config: Dict[str, Any]) -> List[PolicyViolation]:
         """Validate API security configuration"""
         violations = []
         api_policy = self.config.get('api', {})
-        
+
         # Check HTTPS requirement
         if api_policy.get('require_https', True) and not app_config.get('use_https', False):
             violations.append(PolicyViolation(
@@ -245,7 +247,7 @@ class SecurityPolicyEnforcer:
                 remediation="Enable HTTPS/TLS for all API endpoints",
                 finding_ids=[]
             ))
-        
+
         # Check authentication requirement
         if api_policy.get('require_authentication', True) and not app_config.get('auth_enabled', False):
             violations.append(PolicyViolation(
@@ -256,7 +258,7 @@ class SecurityPolicyEnforcer:
                 remediation="Enable authentication middleware",
                 finding_ids=[]
             ))
-        
+
         # Check rate limiting
         max_rpm = api_policy.get('max_requests_per_minute', 60)
         if app_config.get('rate_limit', float('inf')) > max_rpm:
@@ -268,28 +270,28 @@ class SecurityPolicyEnforcer:
                 remediation=f"Set rate limit to {max_rpm} requests per minute or less",
                 finding_ids=[]
             ))
-        
+
         return violations
-    
+
     def validate_compliance(self, project_root: str) -> ComplianceStatus:
         """Run comprehensive compliance validation"""
         violations = []
-        
+
         # Run security scan
         logger.info("Running security scan for compliance validation")
         report = run_security_scan(project_root)
-        
+
         # Validate scan results
         scan_compliance = self.validate_security_report(report)
         violations.extend(scan_compliance.violations)
-        
+
         # Check for required security files
         required_files = [
             'security/security_config.yaml',
             'security/security_scanner.py',
             'requirements.txt'
         ]
-        
+
         for file_path in required_files:
             full_path = os.path.join(project_root, file_path)
             if not os.path.exists(full_path):
@@ -301,19 +303,19 @@ class SecurityPolicyEnforcer:
                     remediation=f"Create required file: {file_path}",
                     finding_ids=[]
                 ))
-        
+
         # Validate Git security
         git_violations = self._validate_git_security(project_root)
         violations.extend(git_violations)
-        
+
         # Check dependency vulnerabilities
         dep_violations = self._validate_dependencies(project_root)
         violations.extend(dep_violations)
-        
+
         # Calculate overall compliance score
         total_findings = report.summary.get('total', 0)
         compliance_score = self._calculate_overall_compliance_score(violations, total_findings)
-        
+
         return ComplianceStatus(
             compliant=len([v for v in violations if v.severity in ['critical', 'high']]) == 0,
             violations=violations,
@@ -325,11 +327,11 @@ class SecurityPolicyEnforcer:
                 'validation_timestamp': datetime.utcnow().isoformat()
             }
         )
-    
+
     def _validate_git_security(self, project_root: str) -> List[PolicyViolation]:
         """Validate Git repository security"""
         violations = []
-        
+
         try:
             # Check for .gitignore
             gitignore_path = os.path.join(project_root, '.gitignore')
@@ -346,10 +348,10 @@ class SecurityPolicyEnforcer:
                 # Check .gitignore contents
                 with open(gitignore_path, 'r') as f:
                     gitignore_content = f.read()
-                
+
                 required_patterns = ['.env', '*.key', '*.pem', '__pycache__']
                 missing_patterns = [p for p in required_patterns if p not in gitignore_content]
-                
+
                 if missing_patterns:
                     violations.append(PolicyViolation(
                         policy_name="git_security",
@@ -359,7 +361,7 @@ class SecurityPolicyEnforcer:
                         remediation=f"Add missing patterns to .gitignore: {missing_patterns}",
                         finding_ids=[]
                     ))
-            
+
             # Check for secrets in recent commits
             result = subprocess.run(
                 ['git', 'log', '--oneline', '-10', '--grep=password|secret|key'],
@@ -368,7 +370,7 @@ class SecurityPolicyEnforcer:
                 text=True,
                 timeout=10
             )
-            
+
             if result.returncode == 0 and result.stdout.strip():
                 violations.append(PolicyViolation(
                     policy_name="git_security",
@@ -378,25 +380,25 @@ class SecurityPolicyEnforcer:
                     remediation="Review and clean commit history of sensitive information",
                     finding_ids=[]
                 ))
-        
+
         except subprocess.TimeoutExpired:
             logger.warning("Git security validation timed out")
         except Exception as e:
             logger.warning(f"Git security validation failed: {e}")
-        
+
         return violations
-    
+
     def _validate_dependencies(self, project_root: str) -> List[PolicyViolation]:
         """Validate dependency security"""
         violations = []
-        
+
         # Check requirements.txt for known vulnerable packages
         requirements_path = os.path.join(project_root, 'requirements.txt')
         if os.path.exists(requirements_path):
             try:
                 with open(requirements_path, 'r') as f:
                     requirements = f.read()
-                
+
                 # Known vulnerable package patterns
                 vulnerable_patterns = {
                     'pillow': '< 8.2.0',
@@ -405,7 +407,7 @@ class SecurityPolicyEnforcer:
                     'pyyaml': '< 5.4.0',
                     'urllib3': '< 1.26.5'
                 }
-                
+
                 for package, version_constraint in vulnerable_patterns.items():
                     if package in requirements.lower():
                         violations.append(PolicyViolation(
@@ -416,17 +418,18 @@ class SecurityPolicyEnforcer:
                             remediation=f"Update {package} to latest secure version",
                             finding_ids=[]
                         ))
-            
+
             except Exception as e:
                 logger.warning(f"Could not validate requirements.txt: {e}")
-        
+
         return violations
-    
-    def _calculate_overall_compliance_score(self, violations: List[PolicyViolation], 
-                                          total_findings: int) -> float:
+
+    def _calculate_overall_compliance_score(self, violations -> None: List[PolicyViolation],
+        """ Calculate Overall Compliance Score."""
+                                            total_findings: int) -> float:
         """Calculate overall compliance score"""
         base_score = 100.0
-        
+
         # Deduct for violations
         for violation in violations:
             if violation.severity == 'critical':
@@ -437,28 +440,28 @@ class SecurityPolicyEnforcer:
                 base_score -= 5
             else:
                 base_score -= 2
-        
+
         # Deduct for total findings
         base_score -= min(total_findings * 0.5, 20)
-        
+
         return max(0.0, base_score)
-    
+
     def send_alert(self, compliance_status: ComplianceStatus) -> bool:
         """Send security alerts based on compliance status"""
         if compliance_status.compliant:
             return True
-        
+
         alert_config = self.config.get('alerts', {})
-        
+
         # Check if we should send immediate alerts
         critical_violations = [v for v in compliance_status.violations if v.severity == 'critical']
         immediate_severities = alert_config.get('immediate_alert_severity', ['critical'])
-        
+
         should_alert = any(v.severity in immediate_severities for v in compliance_status.violations)
-        
+
         if not should_alert:
             return True
-        
+
         # Send webhook alert
         webhook_url = alert_config.get('webhook_url')
         if webhook_url:
@@ -478,20 +481,21 @@ class SecurityPolicyEnforcer:
                         } for v in compliance_status.violations[:10]  # Limit to first 10
                     ]
                 }
-                
+
                 response = requests.post(webhook_url, json=payload, timeout=10)
                 response.raise_for_status()
                 logger.info("Security alert sent successfully")
                 return True
-                
+
             except requests.RequestException as e:
                 logger.error(f"Failed to send security alert: {e}")
                 return False
-        
+
         return True
-    
-    def generate_compliance_report(self, compliance_status: ComplianceStatus, 
-                                 output_path: str) -> bool:
+
+    def generate_compliance_report(self, compliance_status -> None: ComplianceStatus,
+        """Generate Compliance Report."""
+                                output_path: str) -> bool:
         """Generate detailed compliance report"""
         try:
             report_data = {
@@ -515,83 +519,84 @@ class SecurityPolicyEnforcer:
                 ],
                 'recommendations': self._generate_recommendations(compliance_status)
             }
-            
+
             with open(output_path, 'w') as f:
                 json.dump(report_data, f, indent=2)
-            
+
             logger.info(f"Compliance report generated: {output_path}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to generate compliance report: {e}")
             return False
-    
+
     def _generate_recommendations(self, compliance_status: ComplianceStatus) -> List[Dict[str, str]]:
         """Generate remediation recommendations"""
         recommendations = []
-        
+
         # Group violations by severity
         critical_violations = [v for v in compliance_status.violations if v.severity == 'critical']
         high_violations = [v for v in compliance_status.violations if v.severity == 'high']
-        
+
         if critical_violations:
             recommendations.append({
                 'priority': 'immediate',
                 'action': 'Fix critical security violations',
                 'description': f"Address {len(critical_violations)} critical security violations immediately"
             })
-        
+
         if high_violations:
             recommendations.append({
                 'priority': 'urgent',
                 'action': 'Fix high-severity violations',
                 'description': f"Address {len(high_violations)} high-severity violations within 24 hours"
             })
-        
+
         if compliance_status.score < 80:
             recommendations.append({
                 'priority': 'important',
                 'action': 'Improve overall security posture',
                 'description': f"Compliance score of {compliance_status.score:.1f}% needs improvement"
             })
-        
+
         return recommendations
 
 def enforce_security_policy(project_root: str, config_path: str = None) -> ComplianceStatus:
     """Main entry point for security policy enforcement"""
     enforcer = SecurityPolicyEnforcer(config_path)
     compliance_status = enforcer.validate_compliance(project_root)
-    
+
     # Send alerts if needed
     enforcer.send_alert(compliance_status)
-    
+
     # Generate compliance report
     report_dir = os.path.join(project_root, 'security_reports')
     os.makedirs(report_dir, exist_ok=True)
-    
+
     report_path = os.path.join(report_dir, f"compliance_report_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json")
     enforcer.generate_compliance_report(compliance_status, report_path)
-    
+
     return compliance_status
 
 if __name__ == "__main__":
+
     import sys
-    
+
     project_root = sys.argv[1] if len(sys.argv) > 1 else "."
     config_path = sys.argv[2] if len(sys.argv) > 2 else None
-    
+
     logging.basicConfig(level=logging.INFO)
-    
+
     compliance_status = enforce_security_policy(project_root, config_path)
-    
+
     print(f"Compliance Status: {'COMPLIANT' if compliance_status.compliant else 'NON-COMPLIANT'}")
     print(f"Compliance Score: {compliance_status.score:.1f}%")
     print(f"Violations: {len(compliance_status.violations)}")
-    
+
     if compliance_status.violations:
         print("\nTop Violations:")
         for violation in compliance_status.violations[:5]:
             print(f"  - [{violation.severity.upper()}] {violation.description}")
-    
+
     # Exit with error code if not compliant
     sys.exit(0 if compliance_status.compliant else 1)

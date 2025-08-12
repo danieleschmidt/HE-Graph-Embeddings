@@ -1,10 +1,12 @@
 """Database connection and session management"""
 
+
 import os
 from typing import Generator, Optional
 from contextlib import contextmanager
 import logging
 from urllib.parse import urlparse
+
 
 from sqlalchemy import create_engine, event, pool
 from sqlalchemy.orm import sessionmaker, Session, scoped_session
@@ -23,33 +25,35 @@ logger = logging.getLogger(__name__)
 
 class DatabaseConfig:
     """Database configuration"""
-    
+
     def __init__(self):
+        """  Init  ."""
         self.postgresql_url = os.getenv("DATABASE_URL", "postgresql://localhost/he_graph")
         self.redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
         self.mongodb_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/he_graph")
-        
+
         # Connection pool settings
         self.pool_size = int(os.getenv("DB_POOL_SIZE", "20"))
         self.max_overflow = int(os.getenv("DB_MAX_OVERFLOW", "40"))
         self.pool_timeout = int(os.getenv("DB_POOL_TIMEOUT", "30"))
         self.pool_recycle = int(os.getenv("DB_POOL_RECYCLE", "3600"))
-        
+
         # Performance settings
         self.echo_sql = os.getenv("ECHO_SQL", "false").lower() == "true"
         self.slow_query_threshold = float(os.getenv("SLOW_QUERY_THRESHOLD", "1.0"))
 
 class DatabaseManager:
     """Manages database connections and sessions"""
-    
+
     def __init__(self, config: Optional[DatabaseConfig] = None):
+        """  Init  ."""
         self.config = config or DatabaseConfig()
         self._engine: Optional[Engine] = None
         self._session_factory: Optional[sessionmaker] = None
         self._scoped_session: Optional[scoped_session] = None
         self._redis_client: Optional[redis.Redis] = None
         self._mongo_client: Optional[MongoClient] = None
-    
+
     @property
     def engine(self) -> Engine:
         """Get or create SQLAlchemy engine"""
@@ -68,12 +72,12 @@ class DatabaseManager:
                     "application_name": "he_graph_embeddings"
                 }
             )
-            
+
             # Add event listeners
             self._setup_event_listeners(self._engine)
-            
+
         return self._engine
-    
+
     @property
     def session_factory(self) -> sessionmaker:
         """Get or create session factory"""
@@ -85,14 +89,14 @@ class DatabaseManager:
                 expire_on_commit=False
             )
         return self._session_factory
-    
+
     @property
     def scoped_session(self) -> scoped_session:
         """Get or create scoped session"""
         if self._scoped_session is None:
             self._scoped_session = scoped_session(self.session_factory)
         return self._scoped_session
-    
+
     @property
     def redis_client(self) -> redis.Redis:
         """Get or create Redis client"""
@@ -116,7 +120,7 @@ class DatabaseManager:
                     socket_timeout=5
                 )
             )
-            
+
             # Test connection
             try:
                 self._redis_client.ping()
@@ -124,9 +128,9 @@ class DatabaseManager:
             except redis.ConnectionError as e:
                 logger.error(f"Failed to connect to Redis: {e}")
                 raise
-                
+
         return self._redis_client
-    
+
     @property
     def mongo_client(self) -> MongoClient:
         """Get or create MongoDB client"""
@@ -142,7 +146,7 @@ class DatabaseManager:
                 retryWrites=True,
                 retryReads=True
             )
-            
+
             # Test connection
             try:
                 self._mongo_client.admin.command("ping")
@@ -150,25 +154,25 @@ class DatabaseManager:
             except Exception as e:
                 logger.error(f"Failed to connect to MongoDB: {e}")
                 raise
-                
+
         return self._mongo_client
-    
+
     @property
-    def mongo_db(self):
+    def mongo_db(self) -> None:
         """Get MongoDB database"""
         db_name = urlparse(self.config.mongodb_uri).path.lstrip("/") or "he_graph"
         return self.mongo_client[db_name]
-    
-    def create_tables(self):
+
+    def create_tables(self) -> None:
         """Create all database tables"""
         Base.metadata.create_all(bind=self.engine)
         logger.info("Database tables created")
-    
-    def drop_tables(self):
+
+    def drop_tables(self) -> None:
         """Drop all database tables"""
         Base.metadata.drop_all(bind=self.engine)
         logger.info("Database tables dropped")
-    
+
     @contextmanager
     def session_scope(self) -> Generator[Session, None, None]:
         """Provide a transactional scope for database operations"""
@@ -177,68 +181,72 @@ class DatabaseManager:
             yield session
             session.commit()
         except Exception:
+            logger.error(f"Error in operation: {e}")
             session.rollback()
             raise
         finally:
             session.close()
-    
+
     @contextmanager
-    def redis_pipeline(self):
+    def redis_pipeline(self) -> None:
         """Get Redis pipeline for batch operations"""
         pipe = self.redis_client.pipeline()
         try:
             yield pipe
             pipe.execute()
         except Exception:
+            logger.error(f"Error in operation: {e}")
             pipe.reset()
             raise
-    
-    def _setup_event_listeners(self, engine: Engine):
+
+    def _setup_event_listeners(self, engine -> None: Engine):
         """Setup SQLAlchemy event listeners"""
-        
+
         @event.listens_for(engine, "connect")
         def receive_connect(dbapi_conn, connection_record):
             """Configure connection on connect"""
             # Enable foreign keys for SQLite
             if "sqlite" in self.config.postgresql_url:
                 dbapi_conn.execute("PRAGMA foreign_keys=ON")
-        
+
         @event.listens_for(engine, "before_cursor_execute")
         def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
             """Log slow queries"""
             conn.info.setdefault("query_start_time", []).append(os.time.time())
-        
+
         @event.listens_for(engine, "after_cursor_execute")
         def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
             """Check query execution time"""
             total_time = os.time.time() - conn.info["query_start_time"].pop(-1)
             if total_time > self.config.slow_query_threshold:
                 logger.warning(f"Slow query ({total_time:.2f}s): {statement[:100]}...")
-    
-    def close(self):
+
+    def close(self) -> None:
         """Close all database connections"""
         if self._engine:
             self._engine.dispose()
             self._engine = None
-        
+
         if self._scoped_session:
             self._scoped_session.remove()
             self._scoped_session = None
-        
+
         if self._redis_client:
             self._redis_client.close()
             self._redis_client = None
-        
+
         if self._mongo_client:
             self._mongo_client.close()
             self._mongo_client = None
-        
+
         logger.info("All database connections closed")
-    
+
     def __enter__(self):
+        """  Enter  ."""
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """  Exit  ."""
         self.close()
 
 # Global database manager instance
