@@ -1,5 +1,6 @@
 """Setup script for HE-Graph-Embeddings"""
 
+
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
 import subprocess
@@ -7,21 +8,27 @@ import os
 import sys
 
 class CMakeExtension(Extension):
+    """CMakeExtension class."""
     def __init__(self, name, sourcedir=''):
+        """  Init  ."""
         Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
 
 class CMakeBuild(build_ext):
-    def run(self):
+    """CMakeBuild class."""
+    def run(self) -> None:
+        """Run."""
         try:
             subprocess.check_output(['cmake', '--version'])
         except OSError:
+            logger.error(f"Error in operation: {e}")
             raise RuntimeError("CMake must be installed to build the extensions")
-        
+
         for ext in self.extensions:
             self.build_extension(ext)
-    
-    def build_extension(self, ext):
+
+    def build_extension(self, ext) -> None:
+        """Build Extension."""
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cmake_args = [
             f'-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}',
@@ -30,22 +37,22 @@ class CMakeBuild(build_ext):
             '-DBUILD_BENCHMARKS=OFF',
             '-DBUILD_PYTHON_BINDINGS=ON'
         ]
-        
+
         cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
-        
+
         cmake_args += [f'-DCMAKE_BUILD_TYPE={cfg}']
         build_args += ['--', f'-j{os.cpu_count()}']
-        
+
         env = os.environ.copy()
         env['CXXFLAGS'] = f'{env.get("CXXFLAGS", "")} -DVERSION_INFO=\\"{self.distribution.get_version()}\\"'
-        
+
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        
-        subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, 
+
+        subprocess.check_call(['cmake', ext.sourcedir] + cmake_args,
                             cwd=self.build_temp, env=env)
-        subprocess.check_call(['cmake', '--build', '.'] + build_args, 
+        subprocess.check_call(['cmake', '--build', '.'] + build_args,
                             cwd=self.build_temp)
 
 with open("README.md", "r", encoding="utf-8") as fh:

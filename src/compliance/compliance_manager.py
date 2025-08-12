@@ -5,6 +5,7 @@ Manages GDPR, CCPA, HIPAA, PIPEDA, LGPD, PIPL and other privacy regulations
 with automated compliance checks, audit trails, and data protection controls.
 """
 
+
 import asyncio
 import hashlib
 import json
@@ -23,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 class ComplianceFramework(Enum):
     """Supported compliance frameworks"""
-    
+
     GDPR = "GDPR"           # General Data Protection Regulation (EU)
     CCPA = "CCPA"           # California Consumer Privacy Act (US-CA)
     CPRA = "CPRA"           # California Privacy Rights Act (US-CA)
@@ -44,7 +45,7 @@ class ComplianceFramework(Enum):
 
 class DataCategory(Enum):
     """Categories of personal data for classification"""
-    
+
     PERSONAL_IDENTIFIERS = "personal_identifiers"     # Name, email, phone, etc.
     SENSITIVE_PERSONAL = "sensitive_personal"         # Race, religion, health, etc.
     BIOMETRIC = "biometric"                          # Fingerprints, facial recognition
@@ -59,7 +60,7 @@ class DataCategory(Enum):
 
 class ConsentType(Enum):
     """Types of consent for data processing"""
-    
+
     EXPLICIT = "explicit"           # Clear affirmative action
     IMPLIED = "implied"             # Implied from context
     OPT_IN = "opt_in"              # User must actively consent
@@ -69,7 +70,7 @@ class ConsentType(Enum):
 
 class ProcessingPurpose(Enum):
     """Purposes for data processing"""
-    
+
     ENCRYPTION_PROCESSING = "encryption_processing"   # HE computation
     MODEL_TRAINING = "model_training"                 # ML model training
     INFERENCE = "inference"                           # Model inference
@@ -83,7 +84,7 @@ class ProcessingPurpose(Enum):
 @dataclass
 class DataSubject:
     """Data subject information for compliance tracking"""
-    
+
     subject_id: str
     region: str
     applicable_frameworks: List[ComplianceFramework]
@@ -96,10 +97,10 @@ class DataSubject:
     special_category: bool = False
 
 
-@dataclass 
+@dataclass
 class CompliancePolicy:
     """Compliance policy configuration"""
-    
+
     framework: ComplianceFramework
     data_retention_days: int
     consent_required: bool
@@ -121,7 +122,7 @@ class CompliancePolicy:
 @dataclass
 class DataProcessingRecord:
     """Record of data processing activity"""
-    
+
     record_id: str
     subject_id: str
     processing_purpose: ProcessingPurpose
@@ -138,8 +139,9 @@ class DataProcessingRecord:
 
 class ComplianceManager:
     """Manages compliance across multiple frameworks"""
-    
+
     def __init__(self):
+        """  Init  ."""
         self.policies = self._initialize_compliance_policies()
         self.data_subjects = {}
         self.processing_records = []
@@ -147,15 +149,15 @@ class ComplianceManager:
         self.audit_log = []
         self.breach_log = []
         self.localization_manager = LocalizationManager()
-        
+
         # Compliance monitoring
         self.compliance_status = {}
         self.violation_count = 0
         self.last_audit_timestamp = None
-        
+
     def _initialize_compliance_policies(self) -> Dict[ComplianceFramework, CompliancePolicy]:
         """Initialize compliance policies for all supported frameworks"""
-        
+
         return {
             ComplianceFramework.GDPR: CompliancePolicy(
                 framework=ComplianceFramework.GDPR,
@@ -175,7 +177,7 @@ class ComplianceManager:
                 dpo_required=True,
                 privacy_impact_assessment_required=True
             ),
-            
+
             ComplianceFramework.CCPA: CompliancePolicy(
                 framework=ComplianceFramework.CCPA,
                 data_retention_days=365 * 2,  # 2 years typical
@@ -194,7 +196,7 @@ class ComplianceManager:
                 dpo_required=False,
                 privacy_impact_assessment_required=False
             ),
-            
+
             ComplianceFramework.HIPAA: CompliancePolicy(
                 framework=ComplianceFramework.HIPAA,
                 data_retention_days=365 * 6,  # 6 years minimum
@@ -213,7 +215,7 @@ class ComplianceManager:
                 dpo_required=True,  # Privacy Officer
                 privacy_impact_assessment_required=True
             ),
-            
+
             ComplianceFramework.PIPEDA: CompliancePolicy(
                 framework=ComplianceFramework.PIPEDA,
                 data_retention_days=365 * 7,  # 7 years typical
@@ -232,7 +234,7 @@ class ComplianceManager:
                 dpo_required=False,
                 privacy_impact_assessment_required=True
             ),
-            
+
             ComplianceFramework.LGPD: CompliancePolicy(
                 framework=ComplianceFramework.LGPD,
                 data_retention_days=365 * 5,  # 5 years typical
@@ -251,7 +253,7 @@ class ComplianceManager:
                 dpo_required=True,
                 privacy_impact_assessment_required=True
             ),
-            
+
             ComplianceFramework.PIPL: CompliancePolicy(
                 framework=ComplianceFramework.PIPL,
                 data_retention_days=365 * 3,  # 3 years typical
@@ -270,7 +272,7 @@ class ComplianceManager:
                 dpo_required=True,
                 privacy_impact_assessment_required=True
             ),
-            
+
             # Additional frameworks with similar patterns
             ComplianceFramework.APPI: CompliancePolicy(
                 framework=ComplianceFramework.APPI,
@@ -290,7 +292,7 @@ class ComplianceManager:
                 dpo_required=False,
                 privacy_impact_assessment_required=True
             ),
-            
+
             ComplianceFramework.SOC2: CompliancePolicy(
                 framework=ComplianceFramework.SOC2,
                 data_retention_days=365 * 7,
@@ -310,11 +312,12 @@ class ComplianceManager:
                 privacy_impact_assessment_required=False
             )
         }
-    
-    def register_data_subject(self, subject_id: str, region: str, frameworks: List[ComplianceFramework], 
+
+    def register_data_subject(self, subject_id -> None: str, region: str, frameworks: List[ComplianceFramework],
+        """Register Data Subject."""
                             data_categories: Set[DataCategory], is_minor: bool = False) -> DataSubject:
         """Register a data subject for compliance tracking"""
-        
+
         data_subject = DataSubject(
             subject_id=subject_id,
             region=region,
@@ -327,9 +330,9 @@ class ComplianceManager:
             is_minor=is_minor,
             special_category=self._has_special_category_data(data_categories)
         )
-        
+
         self.data_subjects[subject_id] = data_subject
-        
+
         # Log registration
         self._log_audit_event("DATA_SUBJECT_REGISTERED", {
             "subject_id": subject_id,
@@ -337,51 +340,51 @@ class ComplianceManager:
             "frameworks": [f.value for f in frameworks],
             "is_minor": is_minor
         })
-        
+
         return data_subject
-    
+
     def _calculate_retention_period(self, frameworks: List[ComplianceFramework]) -> int:
         """Calculate the minimum retention period across frameworks"""
-        
+
         min_retention = float('inf')
-        
+
         for framework in frameworks:
             policy = self.policies.get(framework)
             if policy:
                 min_retention = min(min_retention, policy.data_retention_days)
-        
+
         return int(min_retention) if min_retention != float('inf') else 365 * 2  # Default 2 years
-    
+
     def _has_special_category_data(self, data_categories: Set[DataCategory]) -> bool:
         """Check if data categories include special/sensitive data"""
-        
+
         special_categories = {
             DataCategory.SENSITIVE_PERSONAL,
             DataCategory.BIOMETRIC,
             DataCategory.HEALTH,
             DataCategory.GENETIC
         }
-        
+
         return bool(special_categories.intersection(data_categories))
-    
-    async def validate_processing(self, subject_id: str, purpose: ProcessingPurpose, 
+
+    async def validate_processing(self, subject_id: str, purpose: ProcessingPurpose,
                                 data_categories: List[DataCategory]) -> Dict[str, Any]:
         """Validate if data processing is compliant"""
-        
+
         if subject_id not in self.data_subjects:
             return {"valid": False, "reason": "Data subject not registered"}
-        
+
         data_subject = self.data_subjects[subject_id]
         validation_results = []
-        
+
         for framework in data_subject.applicable_frameworks:
             policy = self.policies[framework]
             result = await self._validate_against_policy(data_subject, purpose, data_categories, policy)
             validation_results.append(result)
-        
+
         # Processing is valid only if all frameworks allow it
         overall_valid = all(result["valid"] for result in validation_results)
-        
+
         validation_response = {
             "valid": overall_valid,
             "subject_id": subject_id,
@@ -389,23 +392,23 @@ class ComplianceManager:
             "frameworks_checked": [r["framework"] for r in validation_results],
             "framework_results": validation_results
         }
-        
+
         if not overall_valid:
             validation_response["violations"] = [r for r in validation_results if not r["valid"]]
-        
+
         return validation_response
-    
+
     async def _validate_against_policy(self, data_subject: DataSubject, purpose: ProcessingPurpose,
-                                     data_categories: List[DataCategory], policy: CompliancePolicy) -> Dict[str, Any]:
+                                    data_categories: List[DataCategory], policy: CompliancePolicy) -> Dict[str, Any]:
         """Validate processing against a specific compliance policy"""
-        
+
         result = {
             "framework": policy.framework.value,
             "valid": True,
             "requirements_met": [],
             "violations": []
         }
-        
+
         # Check consent requirement
         if policy.consent_required:
             has_consent = self._has_valid_consent(data_subject.subject_id, purpose)
@@ -414,7 +417,7 @@ class ComplianceManager:
             else:
                 result["valid"] = False
                 result["violations"].append("missing_consent")
-        
+
         # Check special category data handling
         if data_subject.special_category and policy.framework in [ComplianceFramework.GDPR, ComplianceFramework.PIPEDA]:
             has_special_consent = self._has_special_category_consent(data_subject.subject_id, data_categories)
@@ -423,7 +426,7 @@ class ComplianceManager:
             else:
                 result["valid"] = False
                 result["violations"].append("missing_special_category_consent")
-        
+
         # Check minor handling
         if data_subject.is_minor and policy.framework in [ComplianceFramework.GDPR, ComplianceFramework.CCPA]:
             has_parental_consent = self._has_parental_consent(data_subject.subject_id)
@@ -432,28 +435,28 @@ class ComplianceManager:
             else:
                 result["valid"] = False
                 result["violations"].append("missing_parental_consent")
-        
+
         # Check data retention
         days_since_creation = (datetime.utcnow() - data_subject.created_at).days
         if days_since_creation > policy.data_retention_days:
             result["valid"] = False
             result["violations"].append("retention_period_exceeded")
-        
+
         return result
-    
+
     def _has_valid_consent(self, subject_id: str, purpose: ProcessingPurpose) -> bool:
         """Check if valid consent exists for processing purpose"""
-        
+
         consent_key = f"{subject_id}:{purpose.value}"
         consent_record = self.consent_records.get(consent_key)
-        
+
         if not consent_record:
             return False
-        
+
         # Check if consent is still valid (not expired or withdrawn)
         if consent_record.get("status") != "active":
             return False
-        
+
         # Check consent expiration
         granted_at = consent_record.get("granted_at")
         if granted_at:
@@ -461,40 +464,41 @@ class ComplianceManager:
             expiry_date = granted_at + timedelta(days=365 * 2)
             if datetime.utcnow() > expiry_date:
                 return False
-        
+
         return True
-    
+
     def _has_special_category_consent(self, subject_id: str, data_categories: List[DataCategory]) -> bool:
         """Check if explicit consent exists for special category data"""
-        
-        special_categories = {DataCategory.SENSITIVE_PERSONAL, DataCategory.BIOMETRIC, 
+
+        special_categories = {DataCategory.SENSITIVE_PERSONAL, DataCategory.BIOMETRIC,
                             DataCategory.HEALTH, DataCategory.GENETIC}
-        
+
         has_special_data = any(cat in special_categories for cat in data_categories)
-        
+
         if not has_special_data:
             return True  # No special consent needed
-        
+
         consent_key = f"{subject_id}:special_category"
         consent_record = self.consent_records.get(consent_key)
-        
+
         return consent_record and consent_record.get("status") == "active"
-    
+
     def _has_parental_consent(self, subject_id: str) -> bool:
         """Check if parental consent exists for minor"""
-        
+
         consent_key = f"{subject_id}:parental_consent"
         consent_record = self.consent_records.get(consent_key)
-        
+
         return consent_record and consent_record.get("status") == "active"
-    
-    def record_consent(self, subject_id: str, purpose: ProcessingPurpose, consent_type: ConsentType,
-                      granted_by: str, metadata: Dict[str, Any] = None) -> str:
+
+    def record_consent(self, subject_id -> None: str, purpose: ProcessingPurpose, consent_type: ConsentType,
+        """Record Consent."""
+                        granted_by: str, metadata: Dict[str, Any] = None) -> str:
         """Record consent for data processing"""
-        
+
         consent_id = str(uuid.uuid4())
         consent_key = f"{subject_id}:{purpose.value}"
-        
+
         consent_record = {
             "consent_id": consent_id,
             "subject_id": subject_id,
@@ -507,14 +511,14 @@ class ComplianceManager:
             "withdrawn_at": None,
             "metadata": metadata or {}
         }
-        
+
         self.consent_records[consent_key] = consent_record
-        
+
         # Update data subject
         if subject_id in self.data_subjects:
             self.data_subjects[subject_id].consent_records[purpose] = consent_record
             self.data_subjects[subject_id].last_updated = datetime.utcnow()
-        
+
         # Log consent
         self._log_audit_event("CONSENT_GRANTED", {
             "consent_id": consent_id,
@@ -522,44 +526,46 @@ class ComplianceManager:
             "purpose": purpose.value,
             "consent_type": consent_type.value
         })
-        
+
         return consent_id
-    
-    def withdraw_consent(self, subject_id: str, purpose: ProcessingPurpose, 
+
+    def withdraw_consent(self, subject_id -> None: str, purpose: ProcessingPurpose,
+        """Withdraw Consent."""
                         withdrawal_method: str = "user_request") -> bool:
         """Withdraw consent for data processing"""
-        
+
         consent_key = f"{subject_id}:{purpose.value}"
         consent_record = self.consent_records.get(consent_key)
-        
+
         if not consent_record or consent_record["status"] != "active":
             return False
-        
+
         consent_record["status"] = "withdrawn"
         consent_record["withdrawn_at"] = datetime.utcnow()
         consent_record["withdrawal_method"] = withdrawal_method
-        
+
         # Update data subject
         if subject_id in self.data_subjects:
             self.data_subjects[subject_id].consent_records[purpose] = consent_record
             self.data_subjects[subject_id].last_updated = datetime.utcnow()
-        
+
         # Log withdrawal
         self._log_audit_event("CONSENT_WITHDRAWN", {
             "subject_id": subject_id,
             "purpose": purpose.value,
             "withdrawal_method": withdrawal_method
         })
-        
+
         return True
-    
-    def record_processing(self, subject_id: str, purpose: ProcessingPurpose, 
-                         data_categories: List[DataCategory], legal_basis: str,
-                         processing_duration_ms: Optional[int] = None) -> str:
+
+    def record_processing(self, subject_id -> None: str, purpose: ProcessingPurpose,
+        """Record Processing."""
+                        data_categories: List[DataCategory], legal_basis: str,
+                        processing_duration_ms: Optional[int] = None) -> str:
         """Record a data processing activity"""
-        
+
         record_id = str(uuid.uuid4())
-        
+
         processing_record = DataProcessingRecord(
             record_id=record_id,
             subject_id=subject_id,
@@ -574,9 +580,9 @@ class ComplianceManager:
             processing_duration_ms=processing_duration_ms,
             encrypted=True
         )
-        
+
         self.processing_records.append(processing_record)
-        
+
         # Log processing
         self._log_audit_event("DATA_PROCESSED", {
             "record_id": record_id,
@@ -585,25 +591,25 @@ class ComplianceManager:
             "data_categories": [cat.value for cat in data_categories],
             "duration_ms": processing_duration_ms
         })
-        
+
         return record_id
-    
+
     def _get_retention_period(self, subject_id: str) -> int:
         """Get retention period for data subject"""
-        
+
         data_subject = self.data_subjects.get(subject_id)
         return data_subject.retention_period_days if data_subject else 365 * 2
-    
-    async def handle_data_subject_request(self, subject_id: str, request_type: str, 
+
+    async def handle_data_subject_request(self, subject_id: str, request_type: str,
                                         details: Dict[str, Any] = None) -> Dict[str, Any]:
         """Handle data subject rights requests (GDPR Article 12-22)"""
-        
+
         if subject_id not in self.data_subjects:
             return {"status": "error", "message": "Data subject not found"}
-        
+
         data_subject = self.data_subjects[subject_id]
         request_id = str(uuid.uuid4())
-        
+
         response = {
             "request_id": request_id,
             "subject_id": subject_id,
@@ -611,35 +617,35 @@ class ComplianceManager:
             "status": "processing",
             "submitted_at": datetime.utcnow().isoformat()
         }
-        
+
         if request_type == "access":
             # Right to access (GDPR Art. 15)
             response.update(await self._handle_access_request(data_subject))
-            
+
         elif request_type == "portability":
             # Right to data portability (GDPR Art. 20)
             response.update(await self._handle_portability_request(data_subject))
-            
+
         elif request_type == "rectification":
             # Right to rectification (GDPR Art. 16)
             response.update(await self._handle_rectification_request(data_subject, details))
-            
+
         elif request_type == "erasure":
             # Right to erasure/deletion (GDPR Art. 17)
             response.update(await self._handle_erasure_request(data_subject))
-            
+
         elif request_type == "restriction":
             # Right to restriction (GDPR Art. 18)
             response.update(await self._handle_restriction_request(data_subject))
-            
+
         elif request_type == "objection":
             # Right to object (GDPR Art. 21)
             response.update(await self._handle_objection_request(data_subject, details))
-            
+
         else:
             response["status"] = "error"
             response["message"] = f"Unknown request type: {request_type}"
-        
+
         # Log the request
         self._log_audit_event("DATA_SUBJECT_REQUEST", {
             "request_id": request_id,
@@ -647,22 +653,22 @@ class ComplianceManager:
             "request_type": request_type,
             "status": response["status"]
         })
-        
+
         return response
-    
+
     async def _handle_access_request(self, data_subject: DataSubject) -> Dict[str, Any]:
         """Handle data access request"""
-        
+
         # Collect all data about the subject
         processing_records = [
             asdict(record) for record in self.processing_records
             if record.subject_id == data_subject.subject_id
         ]
-        
+
         consent_records = {
             purpose.value: record for purpose, record in data_subject.consent_records.items()
         }
-        
+
         return {
             "status": "completed",
             "data": {
@@ -673,10 +679,10 @@ class ComplianceManager:
                 "applicable_frameworks": [f.value for f in data_subject.applicable_frameworks]
             }
         }
-    
+
     async def _handle_portability_request(self, data_subject: DataSubject) -> Dict[str, Any]:
         """Handle data portability request"""
-        
+
         # Export data in machine-readable format
         portable_data = {
             "subject_id": data_subject.subject_id,
@@ -689,48 +695,48 @@ class ComplianceManager:
             "export_timestamp": datetime.utcnow().isoformat(),
             "format": "JSON"
         }
-        
+
         return {
             "status": "completed",
             "portable_data": portable_data
         }
-    
+
     async def _handle_rectification_request(self, data_subject: DataSubject, details: Dict[str, Any]) -> Dict[str, Any]:
         """Handle data rectification request"""
-        
+
         # This would integrate with actual data stores to update incorrect data
         # For now, just log the request
-        
+
         return {
             "status": "completed",
             "message": "Data rectification request processed",
             "changes_requested": details
         }
-    
+
     async def _handle_erasure_request(self, data_subject: DataSubject) -> Dict[str, Any]:
         """Handle data erasure (right to be forgotten) request"""
-        
+
         # Check if erasure is legally required or allowed
         can_erase = True
         reasons_for_retention = []
-        
+
         for framework in data_subject.applicable_frameworks:
             policy = self.policies[framework]
-            
+
             # Some frameworks require data retention
             if framework == ComplianceFramework.HIPAA:
                 can_erase = False
                 reasons_for_retention.append("HIPAA medical record retention requirement")
-            
+
             # Check legal obligations
             if policy.framework in [ComplianceFramework.SOX, ComplianceFramework.PCI_DSS]:
                 can_erase = False
                 reasons_for_retention.append(f"{framework.value} compliance retention requirement")
-        
+
         if can_erase:
             # Mark data for deletion (actual deletion would happen in background job)
             data_subject.last_updated = datetime.utcnow()
-            
+
             return {
                 "status": "completed",
                 "message": "Data marked for erasure",
@@ -742,22 +748,22 @@ class ComplianceManager:
                 "message": "Erasure not permitted due to legal retention requirements",
                 "reasons": reasons_for_retention
             }
-    
+
     async def _handle_restriction_request(self, data_subject: DataSubject) -> Dict[str, Any]:
         """Handle data processing restriction request"""
-        
+
         # Implement processing restriction logic
         return {
             "status": "completed",
             "message": "Data processing restricted for subject",
             "restrictions_applied": ["model_training", "analytics"]
         }
-    
+
     async def _handle_objection_request(self, data_subject: DataSubject, details: Dict[str, Any]) -> Dict[str, Any]:
         """Handle objection to processing request"""
-        
+
         objection_type = details.get("objection_type", "general")
-        
+
         if objection_type == "direct_marketing":
             # Must stop direct marketing immediately
             return {
@@ -776,39 +782,39 @@ class ComplianceManager:
                 "status": "completed",
                 "message": "Processing objection registered"
             }
-    
+
     def _log_audit_event(self, event_type: str, details: Dict[str, Any]) -> None:
         """Log an audit event for compliance tracking"""
-        
+
         audit_entry = {
             "timestamp": datetime.utcnow().isoformat(),
             "event_type": event_type,
             "details": details,
             "audit_id": str(uuid.uuid4())
         }
-        
+
         self.audit_log.append(audit_entry)
-        
+
         # Keep audit log size manageable (in production, would use persistent storage)
         if len(self.audit_log) > 10000:
             self.audit_log = self.audit_log[-5000:]  # Keep last 5000 entries
-    
+
     def generate_compliance_report(self, framework: ComplianceFramework) -> Dict[str, Any]:
         """Generate compliance report for a specific framework"""
-        
+
         policy = self.policies[framework]
-        subjects_count = len([s for s in self.data_subjects.values() 
+        subjects_count = len([s for s in self.data_subjects.values()
                             if framework in s.applicable_frameworks])
-        
-        processing_count = len([r for r in self.processing_records 
-                              if self.data_subjects.get(r.subject_id) and 
-                              framework in self.data_subjects[r.subject_id].applicable_frameworks])
-        
-        consent_count = len([c for c in self.consent_records.values() 
-                           if c["status"] == "active"])
-        
+
+        processing_count = len([r for r in self.processing_records
+                                if self.data_subjects.get(r.subject_id) and
+                                framework in self.data_subjects[r.subject_id].applicable_frameworks])
+
+        consent_count = len([c for c in self.consent_records.values()
+                            if c["status"] == "active"])
+
         violations = self._count_violations(framework)
-        
+
         report = {
             "framework": framework.value,
             "report_date": datetime.utcnow().isoformat(),
@@ -822,40 +828,40 @@ class ComplianceManager:
             "policy_requirements": asdict(policy),
             "recommendations": self._generate_recommendations(framework, violations)
         }
-        
+
         return report
-    
+
     def _count_violations(self, framework: ComplianceFramework) -> int:
         """Count compliance violations for framework"""
-        
+
         # This would be more sophisticated in production
         violations = 0
-        
+
         # Check for expired consents
         for consent in self.consent_records.values():
             if consent["status"] == "active":
                 granted_at = consent.get("granted_at")
                 if granted_at and datetime.utcnow() > granted_at + timedelta(days=365 * 2):
                     violations += 1
-        
+
         # Check for retention period violations
         for subject in self.data_subjects.values():
             if framework in subject.applicable_frameworks:
                 days_old = (datetime.utcnow() - subject.created_at).days
                 if days_old > self.policies[framework].data_retention_days:
                     violations += 1
-        
+
         return violations
-    
+
     def _generate_recommendations(self, framework: ComplianceFramework, violations: int) -> List[str]:
         """Generate compliance recommendations"""
-        
+
         recommendations = []
-        
+
         if violations > 0:
             recommendations.append("Review and clean up expired consent records")
             recommendations.append("Implement automated data retention cleanup")
-        
+
         if framework == ComplianceFramework.GDPR:
             recommendations.extend([
                 "Ensure DPO appointment documentation is current",
@@ -868,7 +874,7 @@ class ComplianceManager:
                 "Conduct security risk assessment",
                 "Update breach response procedures"
             ])
-        
+
         return recommendations
 
 

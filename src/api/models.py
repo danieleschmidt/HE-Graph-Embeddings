@@ -2,6 +2,7 @@
 Pydantic models for API request/response validation
 """
 
+
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
@@ -51,31 +52,34 @@ class GraphRequest(BaseModel):
         None,
         description="Graph-level labels"
     )
-    
+
     @validator('node_features')
     def validate_node_features(cls, v):
+        """Validate Node Features."""
         if not v:
             raise ValueError("Node features cannot be empty")
-        
+
         # Check that all nodes have same feature dimension
         feature_dim = len(v[0])
         for i, node_feat in enumerate(v):
             if len(node_feat) != feature_dim:
                 raise ValueError(f"Inconsistent feature dimension at node {i}")
-        
+
         return v
-    
+
     @validator('edge_index')
     def validate_edge_index(cls, v):
+        """Validate Edge Index."""
         if len(v) != 2:
             raise ValueError("Edge index must have exactly 2 rows (source, target)")
-        
+
         if len(v[0]) != len(v[1]):
             raise ValueError("Source and target edge lists must have same length")
-        
+
         return v
-    
+
     class Config:
+        """Config class."""
         schema_extra = {
             "example": {
                 "node_features": [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]],
@@ -100,13 +104,13 @@ class ModelTrainingRequest(BaseModel):
         le=10,
         description="Number of layers"
     )
-    
+
     # GraphSAGE specific
     aggregator: Optional[AggregatorType] = Field(
         default=AggregatorType.MEAN,
         description="Aggregation function for GraphSAGE"
     )
-    
+
     # GAT specific
     heads: Optional[int] = Field(
         default=1,
@@ -123,14 +127,14 @@ class ModelTrainingRequest(BaseModel):
         ge=1,
         description="Edge feature dimension"
     )
-    
+
     # Training parameters
     learning_rate: float = Field(default=0.01, gt=0, le=1)
     epochs: int = Field(default=100, ge=1, le=10000)
     batch_size: int = Field(default=32, ge=1, le=10000)
     dropout: float = Field(default=0.0, ge=0, le=0.9)
     weight_decay: float = Field(default=0.0, ge=0)
-    
+
     # Encryption parameters
     noise_budget_threshold: float = Field(
         default=10.0,
@@ -141,9 +145,10 @@ class ModelTrainingRequest(BaseModel):
         default=True,
         description="Automatically rescale during training"
     )
-    
+
     @validator('hidden_channels')
     def validate_hidden_channels(cls, v, values):
+        """Validate Hidden Channels."""
         if isinstance(v, int):
             num_layers = values.get('num_layers', 2)
             return [v] * num_layers
@@ -153,8 +158,9 @@ class ModelTrainingRequest(BaseModel):
             return v
         else:
             raise ValueError("hidden_channels must be int or list of ints")
-    
+
     class Config:
+        """Config class."""
         schema_extra = {
             "example": {
                 "model_type": "graphsage",
@@ -195,8 +201,9 @@ class InferenceRequest(BaseModel):
         default=False,
         description="Decrypt output (for testing only)"
     )
-    
+
     class Config:
+        """Config class."""
         schema_extra = {
             "example": {
                 "node_features": [[1.0, 2.0], [3.0, 4.0]],
@@ -218,8 +225,9 @@ class BatchInferenceRequest(BaseModel):
         default=True,
         description="Process graphs in parallel"
     )
-    
+
     class Config:
+        """Config class."""
         schema_extra = {
             "example": {
                 "graphs": [
@@ -292,15 +300,16 @@ class BenchmarkResponse(BaseModel):
     benchmark_results: Dict[str, Any] = Field(..., description="Benchmark metrics")
     configuration: Dict[str, Any] = Field(..., description="Test configuration")
     timestamp: datetime = Field(default_factory=datetime.utcnow)
-    
+
 class ErrorResponse(BaseModel):
     """Standard error response"""
     error: str = Field(..., description="Error type")
     message: str = Field(..., description="Error message")
     details: Optional[Dict[str, Any]] = Field(None, description="Additional error details")
     timestamp: datetime = Field(default_factory=datetime.utcnow)
-    
+
     class Config:
+        """Config class."""
         schema_extra = {
             "example": {
                 "error": "ValidationError",
@@ -331,7 +340,7 @@ class ModelInfo(BaseModel):
     training_status: str = Field(default="initialized", description="Training status")
 
 class TrainingProgress(BaseModel):
-    """Training progress information"""  
+    """Training progress information"""
     epoch: int = Field(..., description="Current epoch")
     total_epochs: int = Field(..., description="Total epochs")
     loss: float = Field(..., description="Current loss")

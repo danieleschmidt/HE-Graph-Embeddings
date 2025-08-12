@@ -2,6 +2,7 @@
 Advanced logging system with correlation IDs, structured logs, and monitoring integration
 """
 
+
 import logging
 import json
 import time
@@ -18,7 +19,7 @@ import sys
 class LogLevel(Enum):
     """Log levels with numeric values"""
     DEBUG = logging.DEBUG
-    INFO = logging.INFO  
+    INFO = logging.INFO
     WARNING = logging.WARNING
     ERROR = logging.ERROR
     CRITICAL = logging.CRITICAL
@@ -32,14 +33,16 @@ class LogContext:
     operation: Optional[str] = None
     component: Optional[str] = None
     request_id: Optional[str] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
+        """To Dict."""
         return {k: v for k, v in asdict(self).items() if v is not None}
 
 class StructuredFormatter(logging.Formatter):
     """JSON formatter for structured logging"""
-    
+
     def format(self, record: logging.LogRecord) -> str:
+        """Format."""
         log_data = {
             "timestamp": datetime.utcnow().isoformat() + "Z",
             "level": record.levelname,
@@ -49,45 +52,47 @@ class StructuredFormatter(logging.Formatter):
             "function": record.funcName,
             "line": record.lineno
         }
-        
+
         # Add context if available
         if hasattr(record, 'context') and record.context:
             log_data.update(record.context.to_dict())
-        
+
         # Add extra fields
         if hasattr(record, 'extra_fields'):
             log_data.update(record.extra_fields)
-        
+
         # Add exception info
         if record.exc_info:
             log_data['exception'] = self.formatException(record.exc_info)
-        
+
         return json.dumps(log_data, default=str)
 
 class CorrelationFilter(logging.Filter):
     """Add correlation ID to log records"""
-    
+
     def filter(self, record: logging.LogRecord) -> bool:
+        """Filter."""
         # Get correlation ID from thread local storage
         context = getattr(_local, 'log_context', None)
         if context:
             record.context = context
         else:
             record.context = None
-        
+
         return True
 
 class PerformanceFilter(logging.Filter):
     """Add performance metrics to log records"""
-    
+
     def filter(self, record: logging.LogRecord) -> bool:
+        """Filter."""
         # Add performance context if available
         perf_context = getattr(_local, 'perf_context', None)
         if perf_context:
             if not hasattr(record, 'extra_fields'):
                 record.extra_fields = {}
             record.extra_fields.update(perf_context)
-        
+
         return True
 
 # Thread-local storage for context
@@ -95,13 +100,14 @@ _local = threading.local()
 
 class HEGraphLogger:
     """Enhanced logger with correlation tracking and structured logging"""
-    
+
     def __init__(self, name: str):
+        """  Init  ."""
         self.logger = logging.getLogger(name)
         self.name = name
         self._setup_logger()
-    
-    def _setup_logger(self):
+
+    def _setup_logger(self) -> None:
         """Configure logger with structured formatting and filters"""
         if not self.logger.handlers:
             # Console handler with structured format
@@ -109,48 +115,53 @@ class HEGraphLogger:
             console_handler.setFormatter(StructuredFormatter())
             console_handler.addFilter(CorrelationFilter())
             console_handler.addFilter(PerformanceFilter())
-            
+
             # File handler for persistent logs
             file_handler = logging.FileHandler('logs/hegraph.log', encoding='utf-8')
             file_handler.setFormatter(StructuredFormatter())
             file_handler.addFilter(CorrelationFilter())
             file_handler.addFilter(PerformanceFilter())
-            
+
             # Error file handler
             error_handler = logging.FileHandler('logs/hegraph_errors.log', encoding='utf-8')
             error_handler.setLevel(logging.ERROR)
             error_handler.setFormatter(StructuredFormatter())
             error_handler.addFilter(CorrelationFilter())
-            
+
             self.logger.addHandler(console_handler)
-            self.logger.addHandler(file_handler) 
+            self.logger.addHandler(file_handler)
             self.logger.addHandler(error_handler)
             self.logger.setLevel(logging.INFO)
-    
-    def _log_with_context(self, level: int, message: str, **kwargs):
+
+    def _log_with_context(self, level -> None: int, message: str, **kwargs):
         """Log message with current context"""
         extra = kwargs.pop('extra', {})
         if kwargs:
             extra['extra_fields'] = kwargs
-        
+
         self.logger.log(level, message, extra=extra)
-    
-    def debug(self, message: str, **kwargs):
+
+    def debug(self, message -> None: str, **kwargs):
+        """Debug."""
         self._log_with_context(logging.DEBUG, message, **kwargs)
-    
-    def info(self, message: str, **kwargs):
+
+    def info(self, message -> None: str, **kwargs):
+        """Info."""
         self._log_with_context(logging.INFO, message, **kwargs)
-    
-    def warning(self, message: str, **kwargs):
+
+    def warning(self, message -> None: str, **kwargs):
+        """Warning."""
         self._log_with_context(logging.WARNING, message, **kwargs)
-    
-    def error(self, message: str, **kwargs):
+
+    def error(self, message -> None: str, **kwargs):
+        """Error."""
         self._log_with_context(logging.ERROR, message, **kwargs)
-    
-    def critical(self, message: str, **kwargs):
+
+    def critical(self, message -> None: str, **kwargs):
+        """Critical."""
         self._log_with_context(logging.CRITICAL, message, **kwargs)
-    
-    def exception(self, message: str, **kwargs):
+
+    def exception(self, message -> None: str, **kwargs):
         """Log exception with traceback"""
         kwargs['exc_info'] = True
         self.error(message, **kwargs)
@@ -173,10 +184,10 @@ def log_context(correlation_id: str = None, **kwargs):
     """Context manager for logging context"""
     correlation_id = correlation_id or str(uuid.uuid4())
     context = LogContext(correlation_id=correlation_id, **kwargs)
-    
+
     old_context = get_log_context()
     set_log_context(context)
-    
+
     try:
         yield context
     finally:
@@ -197,62 +208,67 @@ def performance_context(**metrics):
 
 class PerformanceLogger:
     """Logger for performance metrics and profiling"""
-    
+
     def __init__(self, operation_name: str):
+        """  Init  ."""
         self.operation_name = operation_name
         self.start_time = None
         self.logger = get_logger(f"perf.{operation_name}")
         self.metrics = {}
-    
-    def start(self):
+
+    def start(self) -> None:
         """Start timing"""
         self.start_time = time.perf_counter()
         self.logger.info(f"Started {self.operation_name}")
-    
-    def stop(self, **extra_metrics):
+
+    def stop(self, **extra_metrics) -> None:
         """Stop timing and log results"""
         if self.start_time is None:
             raise ValueError("PerformanceLogger not started")
-        
+
         duration = time.perf_counter() - self.start_time
         self.metrics.update(extra_metrics)
         self.metrics['duration_ms'] = duration * 1000
-        
+
         self.logger.info(
             f"Completed {self.operation_name}",
             **self.metrics
         )
-        
+
         return duration
-    
-    def checkpoint(self, name: str, **metrics):
+
+    def checkpoint(self, name -> None: str, **metrics):
         """Log intermediate checkpoint"""
         if self.start_time is None:
             raise ValueError("PerformanceLogger not started")
-        
+
         elapsed = time.perf_counter() - self.start_time
         self.logger.info(
             f"Checkpoint {name} in {self.operation_name}",
             elapsed_ms=elapsed * 1000,
             **metrics
         )
-    
+
     def __enter__(self):
+        """  Enter  ."""
         self.start()
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """  Exit  ."""
         status = "failed" if exc_type else "success"
         self.stop(status=status)
 
 class SecurityLogger:
     """Specialized logger for security events"""
-    
+
     def __init__(self):
+        """  Init  ."""
         self.logger = get_logger("security")
-    
-    def authentication_attempt(self, user_id: str, success: bool, 
-                             ip_address: str, user_agent: str = None):
+
+    def authentication_attempt(self, user_id -> None: str, success: bool,
+        """Authentication Attempt."""
+                            ip_address: str, user_agent: str = None):
         """Log authentication attempt"""
         self.logger.info(
             f"Authentication {'successful' if success else 'failed'}",
@@ -262,9 +278,10 @@ class SecurityLogger:
             ip_address=ip_address,
             user_agent=user_agent
         )
-    
-    def access_attempt(self, user_id: str, resource: str, action: str, 
-                      success: bool, reason: str = None):
+
+    def access_attempt(self, user_id -> None: str, resource: str, action: str,
+        """Access Attempt."""
+                        success: bool, reason: str = None):
         """Log access attempt"""
         self.logger.info(
             f"Access attempt: {action} on {resource}",
@@ -275,9 +292,10 @@ class SecurityLogger:
             success=success,
             reason=reason
         )
-    
-    def suspicious_activity(self, description: str, user_id: str = None, 
-                          ip_address: str = None, **details):
+
+    def suspicious_activity(self, description -> None: str, user_id: str = None,
+        """Suspicious Activity."""
+                            ip_address: str = None, **details):
         """Log suspicious activity"""
         self.logger.warning(
             f"Suspicious activity: {description}",
@@ -286,9 +304,10 @@ class SecurityLogger:
             ip_address=ip_address,
             **details
         )
-    
-    def security_violation(self, violation_type: str, description: str,
-                          severity: str = "medium", **details):
+
+    def security_violation(self, violation_type -> None: str, description: str,
+        """Security Violation."""
+                            severity: str = "medium", **details):
         """Log security violation"""
         log_method = self.logger.critical if severity == "high" else self.logger.error
         log_method(
@@ -301,12 +320,14 @@ class SecurityLogger:
 
 class AuditLogger:
     """Logger for audit trails"""
-    
+
     def __init__(self):
+        """  Init  ."""
         self.logger = get_logger("audit")
-    
-    def data_access(self, user_id: str, data_type: str, operation: str,
-                   record_count: int = None, **metadata):
+
+    def data_access(self, user_id -> None: str, data_type: str, operation: str,
+        """Data Access."""
+                    record_count: int = None, **metadata):
         """Log data access"""
         self.logger.info(
             f"Data access: {operation} on {data_type}",
@@ -317,9 +338,10 @@ class AuditLogger:
             record_count=record_count,
             **metadata
         )
-    
-    def model_training(self, user_id: str, model_name: str, 
-                      dataset_info: Dict[str, Any], **parameters):
+
+    def model_training(self, user_id -> None: str, model_name: str,
+        """Model Training."""
+                        dataset_info: Dict[str, Any], **parameters):
         """Log model training"""
         self.logger.info(
             f"Model training started: {model_name}",
@@ -329,9 +351,10 @@ class AuditLogger:
             dataset_info=dataset_info,
             **parameters
         )
-    
-    def encryption_operation(self, user_id: str, operation: str,
-                           data_size: int, context_name: str):
+
+    def encryption_operation(self, user_id -> None: str, operation: str,
+        """Encryption Operation."""
+                            data_size: int, context_name: str):
         """Log encryption operations"""
         self.logger.info(
             f"Encryption operation: {operation}",
@@ -357,15 +380,15 @@ def setup_logging(log_level: str = "INFO", log_dir: str = "logs"):
     """Setup global logging configuration"""
     # Create log directory
     os.makedirs(log_dir, exist_ok=True)
-    
+
     # Set global log level
     numeric_level = getattr(logging, log_level.upper(), logging.INFO)
     logging.getLogger().setLevel(numeric_level)
-    
+
     # Configure root logger
     root_logger = logging.getLogger()
     root_logger.handlers.clear()  # Remove default handlers
-    
+
     # Add structured console handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(StructuredFormatter())
@@ -376,9 +399,11 @@ def setup_logging(log_level: str = "INFO", log_dir: str = "logs"):
 def log_function_call(logger_name: str = None):
     """Decorator to log function calls with performance metrics"""
     def decorator(func):
+        """Decorator."""
         logger = get_logger(logger_name or func.__module__)
-        
+
         def wrapper(*args, **kwargs):
+            """Wrapper."""
             with PerformanceLogger(func.__name__) as perf:
                 try:
                     result = func(*args, **kwargs)
@@ -387,15 +412,16 @@ def log_function_call(logger_name: str = None):
                 except Exception as e:
                     logger.error(f"Function {func.__name__} failed: {str(e)}")
                     raise
-        
+
         return wrapper
     return decorator
 
 def log_async_function_call(logger_name: str = None):
     """Decorator to log async function calls"""
     def decorator(func):
+        """Decorator."""
         logger = get_logger(logger_name or func.__module__)
-        
+
         async def wrapper(*args, **kwargs):
             with PerformanceLogger(func.__name__) as perf:
                 try:
@@ -405,7 +431,7 @@ def log_async_function_call(logger_name: str = None):
                 except Exception as e:
                     logger.error(f"Async function {func.__name__} failed: {str(e)}")
                     raise
-        
+
         return wrapper
     return decorator
 

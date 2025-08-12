@@ -1,24 +1,16 @@
 {
-  "timestamp": "2025-08-11T08:23:23.508823",
-  "overall_score": 0.8451191941893036,
+  "timestamp": "2025-08-12T21:39:56.965542",
+  "overall_score": 0.8180555555555555,
   "passed": false,
-  "execution_time": 0.4838531017303467,
+  "execution_time": 0.13358616828918457,
   "metrics": {
     "code_quality": {
-      "score": 0.528453260373917,
-      "details": {
-        "complexity_score": 1.0,
-        "style_score": 0.3382352941176471,
-        "docstring_score": 0.7906976744186046,
-        "import_score": 0.18000000000000008,
-        "error_handling_score": 0.3333333333333333
-      },
-      "issues": [],
-      "recommendations": [
-        "Improve code complexity and maintainability",
-        "Standardize code formatting and style",
-        "Add comprehensive docstrings to functions and classes"
-      ]
+      "score": 0.5,
+      "details": {},
+      "issues": [
+        "Code quality analysis failed: name 'e' is not defined"
+      ],
+      "recommendations": []
     },
     "security": {
       "score": 0.9375,
@@ -32,14 +24,15 @@
       "recommendations": []
     },
     "performance": {
-      "score": 0.8339285714285715,
+      "score": 0.7,
       "details": {
         "algorithmic_complexity": 0.85,
         "memory_efficiency": 0.8,
-        "io_efficiency": 0.9,
-        "concurrency_score": 0.7857142857142857
+        "io_efficiency": 0.9
       },
-      "issues": [],
+      "issues": [
+        "Performance analysis failed: name 'e' is not defined"
+      ],
       "recommendations": []
     },
     "research": {
