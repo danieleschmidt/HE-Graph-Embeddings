@@ -624,7 +624,7 @@ class EntanglementManager:
 
         return groups
 
-    def _find_connected_component(self, start -> None: str, graph: Dict[str, Set[str]],
+    def _find_connected_component(self, start: str) -> None:, graph: Dict[str, Set[str]],
         """ Find Connected Component."""
                                 visited: set) -> Set[str]:
         """Find connected component using DFS"""

@@ -72,7 +72,7 @@ class ResourcePool:
             return self.gpu_locks[device_id].acquire(blocking=False)
         return False
 
-    def release_gpu(self, device_id -> None: int = 0):
+    def release_gpu(self, device_id: int = 0) -> None:
         """Release GPU lock"""
         if device_id in self.gpu_locks:
             self.gpu_locks[device_id].release()
@@ -81,9 +81,9 @@ class ResourcePool:
         """Check if system is under memory pressure"""
         return self.memory_monitor.get_memory_usage_percent() > self.limits.memory_threshold_percent
 
-    def optimize_batch_size(self, requested_batch_size -> None: int,
-        """Optimize Batch Size."""
+    def optimize_batch_size(self, requested_batch_size: int,
                             memory_per_sample_mb: float = 10.0) -> int:
+        """Optimize Batch Size."""
         """Optimize batch size based on available memory"""
         available_memory_gb = self.memory_monitor.get_available_memory_gb()
         max_samples = int((available_memory_gb * 1024) / memory_per_sample_mb * 0.8)  # 80% safety margin
@@ -218,7 +218,7 @@ class BatchProcessor:
         """Get current optimal batch size"""
         return self.optimal_batch_size
 
-    def _update_batch_size_optimization(self, batch_size -> None: int, throughput: float, success: bool):
+    def _update_batch_size_optimization(self, batch_size: int, throughput: float, success: bool) -> None:
         """Update batch size optimization based on performance"""
         self.performance_history.append({
             "batch_size": batch_size,
@@ -311,12 +311,12 @@ class LoadBalancer:
 
         return best_worker
 
-    def update_worker_load(self, worker -> None: str, load_delta: int):
+    def update_worker_load(self, worker: str, load_delta: int) -> None:
         """Update worker load"""
         if worker in self.worker_loads:
             self.worker_loads[worker] += load_delta
 
-    def update_worker_performance(self, worker -> None: str, duration: float):
+    def update_worker_performance(self, worker: str, duration: float) -> None:
         """Update worker performance metrics"""
         if worker in self.worker_performance:
             perf = self.worker_performance[worker]

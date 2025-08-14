@@ -219,7 +219,7 @@ class CKKSContext:
             self
         )
 
-    def _relinearize(self, c0 -> None: torch.Tensor, c1: torch.Tensor,
+    def _relinearize(self, c0: torch.Tensor) -> None:, c1: torch.Tensor,
         """ Relinearize."""
                     c2: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """Relinearization to reduce ciphertext size"""
@@ -386,7 +386,7 @@ class HEGraphSAGE(HEModule):
                 in_dim, out_channels, aggregator, context
             ))
 
-    def forward(self, x_enc -> None: EncryptedTensor,
+    def forward(self, x_enc: EncryptedTensor) -> None:,
         """Forward."""
                 edge_index: torch.Tensor) -> EncryptedTensor:
         """Forward pass with encrypted features"""
@@ -444,7 +444,7 @@ class GraphSAGEConv(HEModule):
         self.lin_self = HELinear(in_channels, out_channels, context)
         self.lin_neigh = HELinear(in_channels, out_channels, context)
 
-    def forward(self, x_enc -> None: EncryptedTensor,
+    def forward(self, x_enc: EncryptedTensor) -> None:,
         """Forward."""
                 edge_index: torch.Tensor) -> EncryptedTensor:
         """GraphSAGE forward pass"""
@@ -460,7 +460,7 @@ class GraphSAGEConv(HEModule):
 
         return output
 
-    def _aggregate(self, x_enc -> None: EncryptedTensor,
+    def _aggregate(self, x_enc: EncryptedTensor) -> None:,
         """ Aggregate."""
                     edge_index: torch.Tensor) -> EncryptedTensor:
         """Aggregate neighbor features"""
@@ -543,7 +543,7 @@ class HEGAT(HEModule):
         self.softmax_order = 3
         self.softmax_range = (-5, 5)
 
-    def forward(self, x_enc -> None: EncryptedTensor, edge_index: torch.Tensor,
+    def forward(self, x_enc: EncryptedTensor) -> None:, edge_index: torch.Tensor,
         """Forward."""
                 edge_attr_enc: Optional[EncryptedTensor] = None) -> EncryptedTensor:
         """GAT forward pass with encrypted features"""
@@ -571,7 +571,7 @@ class HEGAT(HEModule):
 
         return output_enc
 
-    def _compute_attention(self, q_enc -> None: EncryptedTensor, k_enc: EncryptedTensor,
+    def _compute_attention(self, q_enc: EncryptedTensor) -> None:, k_enc: EncryptedTensor,
         """ Compute Attention."""
                             edge_index: torch.Tensor) -> EncryptedTensor:
         """Compute attention scores"""
@@ -602,7 +602,7 @@ class HEGAT(HEModule):
 
         return result
 
-    def _apply_attention(self, attn_weights_enc -> None: EncryptedTensor,
+    def _apply_attention(self, attn_weights_enc: EncryptedTensor) -> None:,
         """ Apply Attention."""
                         v_enc: EncryptedTensor,
                         edge_index: torch.Tensor) -> EncryptedTensor:
@@ -610,7 +610,7 @@ class HEGAT(HEModule):
         # Simplified - actual implementation needs message passing
         return attn_weights_enc * v_enc
 
-    def set_softmax_approximation(self, method -> None: str = 'taylor',
+    def set_softmax_approximation(self, method: str = 'taylor') -> None:,
         """Set Softmax Approximation."""
                                     order: int = 3,
                                     range: Tuple[float, float] = (-5, 5)):
@@ -675,7 +675,7 @@ class NoiseTracker:
         """  Exit  ."""
         pass
 
-    def update(self, ciphertext -> None: EncryptedTensor):
+    def update(self, ciphertext: EncryptedTensor) -> None:):
         """Update noise estimate"""
         self.current_noise = ciphertext.noise_budget
         self.noise_history.append(self.current_noise)

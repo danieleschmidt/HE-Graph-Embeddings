@@ -28,7 +28,7 @@ class MockTensor:
         self.shape = shape
         self.data = data or [random.random() for _ in range(np.prod(shape))]
 
-    def size(self, dim -> None: int = None):
+    def size(self, dim: int = None) -> None:
         """Size."""
         if dim is None:
             return self.shape
@@ -367,14 +367,14 @@ class SimplifiedResearchValidator:
             }
         }
 
-    def save_results(self, results -> None: Dict[str, Any]):
+    def save_results(self, results: Dict[str, Any]) -> None:
         """Save experimental results"""
         with open(self.output_dir / 'comprehensive_results.json', 'w') as f:
             json.dump(results, f, indent=2, default=str)
 
         logger.info(f"Results saved to {self.output_dir}")
 
-    def generate_plots(self, results -> None: Dict[str, Any]):
+    def generate_plots(self, results: Dict[str, Any]) -> None:
         """Generate research plots"""
         try:
 
@@ -514,7 +514,7 @@ class SimplifiedResearchValidator:
         except ImportError:
             logger.warning("Matplotlib not available, skipping plot generation")
 
-    def generate_summary_report(self, results -> None: Dict[str, Any]):
+    def generate_summary_report(self, results: Dict[str, Any]) -> None:
         """Generate comprehensive summary report"""
         report_path = self.output_dir / 'research_summary_report.md'
 

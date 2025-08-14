@@ -75,7 +75,7 @@ class LoadTestMetrics:
         self.timestamps = []
         self.lock = threading.Lock()
 
-    def record_request(self, response_time -> None: float, success: bool, error: str = None):
+    def record_request(self, response_time: float, success: bool, error: str = None) -> None:
         """Record a request result"""
         with self.lock:
             self.request_times.append(response_time)

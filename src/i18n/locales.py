@@ -192,7 +192,7 @@ class LocalizationManager:
         self.current_locale = default_locale
         self.translations = TRANSLATIONS
 
-    def set_locale(self, locale -> None: SupportedLocale):
+    def set_locale(self, locale: SupportedLocale) -> None:):
         """Set current locale"""
         if locale in SupportedLocale:
             self.current_locale = locale

@@ -60,7 +60,7 @@ class AdaptiveThreshold:
         self.response_times = deque(maxlen=window_size)
         self.lock = threading.Lock()
 
-    def record_request(self, success -> None: bool, duration: float):
+    def record_request(self, success: bool, duration: float) -> None:
         """Record request outcome and duration"""
         with self.lock:
             self.success_rates.append(1.0 if success else 0.0)
@@ -164,7 +164,7 @@ class CircuitBreaker:
             self._on_failure(time.time() - start_time, e)
             raise
 
-    def _on_success(self, duration -> None: float):
+    def _on_success(self, duration: float) -> None:
         """Handle successful execution"""
         current_time = time.time()
 
@@ -192,7 +192,7 @@ class CircuitBreaker:
 
             logger.debug(f"Circuit breaker '{self.name}' success: duration={duration:.3f}s, state={self.state.value}")
 
-    def _on_failure(self, duration -> None: float, exception: Exception):
+    def _on_failure(self, duration: float, exception: Exception) -> None:
         """Handle failed execution"""
         current_time = time.time()
 
@@ -298,7 +298,7 @@ class CircuitBreaker:
             self.next_attempt_time = 0
             logger.info(f"Circuit breaker '{self.name}' manually reset")
 
-    def force_open(self, duration -> None: float = None):
+    def force_open(self, duration: float = None) -> None:
         """Force circuit breaker to open state"""
         with self.lock:
             self.state = CircuitState.OPEN
@@ -334,7 +334,7 @@ class CircuitBreakerManager:
                 self.breakers[name] = CircuitBreaker(name, config)
             return self.breakers[name]
 
-    def remove_breaker(self, name -> None: str):
+    def remove_breaker(self, name: str) -> None:
         """Remove circuit breaker"""
         with self.lock:
             if name in self.breakers:

@@ -117,7 +117,7 @@ class WorkerProcess:
             self.status = "failed"
             raise
 
-    def stop(self, timeout -> None: float = 10.0):
+    def stop(self, timeout: float = 10.0) -> None:
         """Stop worker process gracefully"""
         if not self.process or not self.process.is_alive():
             return
@@ -321,7 +321,7 @@ class WorkerPool:
 
             logger.info(f"Worker pool started with {len(self.workers)} workers")
 
-    def stop(self, timeout -> None: float = 30.0):
+    def stop(self, timeout: float = 30.0) -> None:
         """Stop the worker pool"""
         if not self.running:
             return
@@ -345,7 +345,7 @@ class WorkerPool:
             self.workers.clear()
             logger.info("Worker pool stopped")
 
-    def submit(self, func -> None: Callable, *args, priority: int = 1, timeout: float = None,
+    def submit(self, func: Callable, *args, priority: int = 1, timeout: float = None,
         """Submit."""
                 max_retries: int = 3, callback: Callable = None, **kwargs) -> concurrent.futures.Future:
         """Submit work to the pool"""
@@ -395,7 +395,7 @@ class WorkerPool:
             logger.error(f"Failed to add worker: {e}")
             return None
 
-    def _remove_worker(self, worker_id -> None: str):
+    def _remove_worker(self, worker_id: str) -> None:
         """Remove worker from pool"""
         if worker_id in self.workers:
             worker = self.workers[worker_id]
@@ -629,7 +629,7 @@ class AutoScaler:
         self.last_scale_action = 0
         self.scaling_history = deque(maxlen=10)
 
-    def should_scale_up(self, current_workers -> None: int, queue_utilization: float,
+    def should_scale_up(self, current_workers: int, queue_utilization: float,
         """Should Scale Up."""
                         avg_worker_load: float) -> bool:
         """Check if should scale up"""
@@ -642,7 +642,7 @@ class AutoScaler:
         return (queue_utilization > self.config.scale_up_threshold or
                 avg_worker_load > self.config.scale_up_threshold)
 
-    def should_scale_down(self, current_workers -> None: int, queue_utilization: float,
+    def should_scale_down(self, current_workers: int, queue_utilization: float,
         """Should Scale Down."""
                         avg_worker_load: float) -> bool:
         """Check if should scale down"""
@@ -655,7 +655,7 @@ class AutoScaler:
         return (queue_utilization < self.config.scale_down_threshold and
                 avg_worker_load < self.config.scale_down_threshold)
 
-    def record_scaling_action(self, action -> None: str, worker_count: int):
+    def record_scaling_action(self, action: str, worker_count: int) -> None:
         """Record scaling action"""
         self.last_scale_action = time.time()
         self.scaling_history.append({

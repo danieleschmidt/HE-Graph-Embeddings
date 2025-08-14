@@ -277,7 +277,7 @@ class ErrorMetrics:
         self.error_rates = {}
         self.last_error_time = {}
 
-    def record_error(self, error -> None: HEGraphError):
+    def record_error(self, error: HEGraphError) -> None:
         """Record an error for metrics"""
         error_type = error.__class__.__name__
 

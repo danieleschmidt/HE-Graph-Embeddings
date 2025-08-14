@@ -1232,7 +1232,7 @@ class BreakthroughAlgorithmBenchmark:
             theoretical_complexity=complexity
         )
 
-    def _calculate_accuracy_preservation(self, baseline -> None: torch.Tensor,
+    def _calculate_accuracy_preservation(self, baseline: torch.Tensor) -> None:,
         """ Calculate Accuracy Preservation."""
                                         result: torch.Tensor) -> float:
         """Calculate accuracy preservation compared to baseline"""
