@@ -28,7 +28,7 @@ from abc import ABC, abstractmethod
 # Import HE infrastructure
 try:
     from ..python.he_graph import CKKSContext, EncryptedTensor, HEConfig
-except ImportError:
+except ImportError as e:
     logger.error(f"Error in operation: {e}")
     # Fallback for development
 
@@ -90,7 +90,6 @@ class QuantumTaskScheduler:
     """Quantum-inspired task scheduler with homomorphic encryption"""
 
     def __init__(self, he_context: Optional[CKKSContext] = None,
-        """  Init  ."""
                 max_entanglement_depth: int = 5,
                 quantum_coherence_time: float = 300.0):
         """
@@ -427,7 +426,7 @@ class QuantumTaskScheduler:
         result = []
 
         def dfs(task_id: str):
-            """Dfs."""
+            """Depth-first search helper function."""
             if task_id in visited:
                 return
             visited.add(task_id)
@@ -480,7 +479,7 @@ class QuantumOptimizer:
     """Quantum-inspired optimization engine"""
 
     def __init__(self, he_context: CKKSContext):
-        """  Init  ."""
+        """Initialize quantum optimizer with homomorphic encryption context."""
         self.he_context = he_context
         self.quantum_annealing_temperature = 1000.0
         self.annealing_schedule = lambda t: 1000.0 * np.exp(-0.01 * t)
@@ -606,7 +605,7 @@ class EntanglementManager:
     """Manage quantum entanglement between tasks"""
 
     def __init__(self, max_depth: int):
-        """  Init  ."""
+        """Initialize entanglement manager with maximum depth."""
         self.max_depth = max_depth
         self.entanglement_graph = {}
 
@@ -624,8 +623,7 @@ class EntanglementManager:
 
         return groups
 
-    def _find_connected_component(self, start: str) -> None:, graph: Dict[str, Set[str]],
-        """ Find Connected Component."""
+    def _find_connected_component(self, start: str, graph: Dict[str, Set[str]],
                                 visited: set) -> Set[str]:
         """Find connected component using DFS"""
         component = set()
@@ -718,7 +716,6 @@ class InterferenceResolver:
 
 # Factory function for easy instantiation
 def create_quantum_task_scheduler(privacy_level: str = "high",
-    """Create Quantum Task Scheduler."""
                                 performance_mode: str = "balanced") -> QuantumTaskScheduler:
     """
     Factory function to create optimally configured quantum task scheduler
@@ -781,7 +778,7 @@ class QuantumSchedulingSession:
     """Async context manager for quantum scheduling sessions"""
 
     def __init__(self, scheduler: QuantumTaskScheduler):
-        """  Init  ."""
+        """Initialize quantum scheduling session."""
         self.scheduler = scheduler
         self.session_start = None
         self.session_stats = {}

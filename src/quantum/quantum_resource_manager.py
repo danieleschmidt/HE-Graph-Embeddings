@@ -79,7 +79,7 @@ class QuantumResourceNode:
     last_update: float = field(default_factory=time.time)
 
     def __post_init__(self):
-        """  Post Init  ."""
+        """Post-initialization processing for quantum resource node"""
         self.utilization_rate = 1.0 - (self.available_capacity / self.total_capacity)
         self.quantum_amplitudes = torch.tensor([1.0 + 0j], dtype=torch.complex64)
 
@@ -100,7 +100,6 @@ class QuantumResourceManager:
     """Quantum-inspired resource management system"""
 
     def __init__(self, he_context: Optional[CKKSContext] = None,
-        """  Init  ."""
                 monitoring_interval: float = 1.0,
                 quantum_coherence_time: float = 600.0,
                 enable_distributed: bool = False):
@@ -582,8 +581,7 @@ class QuantumResourceManager:
         selected_index = np.random.choice(len(alternatives), p=probabilities)
         return alternatives[selected_index]
 
-    def _calculate_resource_entanglement(self, node1: QuantumResourceNode) -> None:,
-        """ Calculate Resource Entanglement."""
+    def _calculate_resource_entanglement(self, node1: QuantumResourceNode, 
                                         node2: QuantumResourceNode) -> complex:
         """Calculate entanglement strength between resource nodes"""
         # Resources of same type have higher entanglement
@@ -789,7 +787,7 @@ class QuantumMetricsCollector:
     """Collect quantum-enhanced metrics with privacy preservation"""
 
     def __init__(self, he_context: CKKSContext):
-        """  Init  ."""
+        """Initialize quantum metrics collector"""
         self.he_context = he_context
         self.metrics_history = defaultdict(list)
 
@@ -889,8 +887,7 @@ class QuantumPerformancePredictor:
             "recommendations": self._generate_recommendations(predictions, quantum_opportunities)
         }
 
-    def _extract_utilization_series(self, allocations: List[QuantumAllocation]) -> None:,
-        """ Extract Utilization Series."""
+    def _extract_utilization_series(self, allocations: List[QuantumAllocation], 
                                     nodes: Dict[str, QuantumResourceNode]) -> Dict[str, List[float]]:
         """Extract utilization time series from allocation history"""
         series = defaultdict(list)
@@ -904,8 +901,7 @@ class QuantumPerformancePredictor:
 
         return dict(series)
 
-    def _generate_recommendations(self, predictions: Dict[str) -> None:, float],
-        """ Generate Recommendations."""
+    def _generate_recommendations(self, predictions: Dict[str, float], 
                                 quantum_opportunities: List[Dict[str, Any]]) -> List[str]:
         """Generate optimization recommendations"""
         recommendations = []
