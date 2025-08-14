@@ -28,12 +28,12 @@ class ValidationResult:
         if self.warnings is None:
             self.warnings = []
 
-    def add_error(self, error -> None: str):
+    def add_error(self, error: str) -> None:
         """Add validation error"""
         self.errors.append(error)
         self.is_valid = False
 
-    def add_warning(self, warning -> None: str):
+    def add_warning(self, warning: str) -> None:
         """Add validation warning"""
         self.warnings.append(warning)
 
@@ -47,7 +47,6 @@ class TensorValidator:
 
     @staticmethod
     def validate_tensor(tensor: Any, name: str = "tensor",
-        """Validate Tensor."""
                         min_dims: int = None, max_dims: int = None,
                         min_size: int = None, max_size: int = None,
                         dtype: torch.dtype = None,
@@ -98,7 +97,6 @@ class TensorValidator:
 
     @staticmethod
     def validate_graph_tensor(tensor: torch.Tensor, num_nodes: int,
-        """Validate Graph Tensor."""
                             feature_dim: int, name: str = "graph_tensor") -> ValidationResult:
         """Validate graph-specific tensor shapes"""
         result = TensorValidator.validate_tensor(
@@ -226,7 +224,6 @@ class GraphValidator:
 
     @staticmethod
     def validate_graph_structure(num_nodes: int, edge_index: torch.Tensor,
-        """Validate Graph Structure."""
                                 features: torch.Tensor) -> ValidationResult:
         """Validate complete graph structure"""
         result = ValidationResult(is_valid=True, errors=[], warnings=[])
@@ -340,7 +337,6 @@ class SecurityValidator:
 
     @staticmethod
     def validate_security_level(poly_degree: int, coeff_modulus_bits: List[int],
-        """Validate Security Level."""
                                 target_security: int = 128) -> ValidationResult:
         """Validate security level using simplified LWE estimator"""
         result = ValidationResult(is_valid=True, errors=[], warnings=[])

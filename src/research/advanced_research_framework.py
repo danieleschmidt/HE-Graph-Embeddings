@@ -914,7 +914,7 @@ class AdvancedResearchFramework:
             'sample_size': len(results)
         }
 
-    def _calculate_comparative_metrics(self, treatment -> None: Dict[str, Any],
+    def _calculate_comparative_metrics(self, treatment: Dict[str) -> None:, Any],
         """ Calculate Comparative Metrics."""
                                     control: Dict[str, Any]) -> Dict[str, Any]:
         """Calculate comparative metrics between treatment and control"""

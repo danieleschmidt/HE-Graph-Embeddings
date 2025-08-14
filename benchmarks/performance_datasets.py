@@ -415,9 +415,9 @@ class GraphBenchmarkSuite:
             "summary": benchmark_summary
         }
 
-    def _analyze_benchmark_results(self, results -> None: List[BenchmarkResult],
-        """ Analyze Benchmark Results."""
+    def _analyze_benchmark_results(self, results: List[BenchmarkResult],
                                 summary: Dict[str, Any]) -> Dict[str, Any]:
+        """ Analyze Benchmark Results."""
         """Analyze benchmark results comprehensively"""
 
         # Group results by method
@@ -484,7 +484,7 @@ class GraphBenchmarkSuite:
             }
         }
 
-    def _save_benchmark_results(self, results -> None: List[BenchmarkResult], analysis: Dict[str, Any]):
+    def _save_benchmark_results(self, results: List[BenchmarkResult], analysis: Dict[str, Any]) -> None:
         """Save benchmark results and analysis"""
 
         # Save detailed results
@@ -504,7 +504,7 @@ class GraphBenchmarkSuite:
         # Generate human-readable report
         self._generate_benchmark_report(results, analysis)
 
-    def _generate_benchmark_report(self, results -> None: List[BenchmarkResult], analysis: Dict[str, Any]):
+    def _generate_benchmark_report(self, results: List[BenchmarkResult], analysis: Dict[str, Any]) -> None:
         """Generate human-readable benchmark report"""
 
         report_path = self.output_dir / "benchmark_report.md"

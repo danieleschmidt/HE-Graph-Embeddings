@@ -223,7 +223,7 @@ class MemoryAwareCache:
         # Return key with lowest score
         return min(scores.keys(), key=lambda k: scores[k])
 
-    def _evict_entry(self, key -> None: str):
+    def _evict_entry(self, key: str) -> None:
         """Remove entry from cache"""
         if key in self.cache:
             entry = self.cache[key]
@@ -231,7 +231,7 @@ class MemoryAwareCache:
             del self.cache[key]
             self.stats.evictions += 1
 
-    def _update_access_patterns(self, key -> None: str):
+    def _update_access_patterns(self, key: str) -> None:
         """Update access patterns for adaptive caching"""
         current_time = time.time()
         if key not in self.access_patterns:
@@ -245,7 +245,7 @@ class MemoryAwareCache:
             t for t in self.access_patterns[key] if t >= cutoff
         ]
 
-    def _update_avg_access_time(self, access_time_ms -> None: float):
+    def _update_avg_access_time(self, access_time_ms: float) -> None:
         """Update average access time"""
         if self.stats.avg_access_time_ms == 0:
             self.stats.avg_access_time_ms = access_time_ms
@@ -383,7 +383,7 @@ class ComputationCache:
 
         return f"{base_key}_{dep_hash}"
 
-    def invalidate_dependents(self, dependency -> None: Any):
+    def invalidate_dependents(self, dependency: Any) -> None:
         """Invalidate all computations that depend on given value"""
         to_remove = []
 
@@ -409,7 +409,7 @@ class EncryptionCache:
         )
         self.context_cache = {}  # Cache CKKS contexts
 
-    def cache_encrypted_tensor(self, key -> None: str, encrypted_tensor: Any,
+    def cache_encrypted_tensor(self, key: str, encrypted_tensor: Any,
         """Cache Encrypted Tensor."""
                                 context_name: str = "default") -> bool:
         """Cache encrypted tensor with context reference"""
@@ -421,7 +421,7 @@ class EncryptionCache:
         cache_key = f"{context_name}_{key}"
         return self.cache.get(cache_key)
 
-    def cache_context(self, name -> None: str, context: Any):
+    def cache_context(self, name: str, context: Any) -> None:
         """Cache CKKS context (keys are expensive to generate)"""
         self.context_cache[name] = {
             "context": context,
@@ -437,7 +437,7 @@ class EncryptionCache:
             return entry["context"]
         return None
 
-    def invalidate_context(self, name -> None: str):
+    def invalidate_context(self, name: str) -> None:
         """Invalidate cached context and related encrypted data"""
         # Remove context
         if name in self.context_cache:

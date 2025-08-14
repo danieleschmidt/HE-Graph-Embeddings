@@ -424,7 +424,7 @@ class SecurityPolicyEnforcer:
 
         return violations
 
-    def _calculate_overall_compliance_score(self, violations -> None: List[PolicyViolation],
+    def _calculate_overall_compliance_score(self, violations: List[PolicyViolation]) -> None:,
         """ Calculate Overall Compliance Score."""
                                             total_findings: int) -> float:
         """Calculate overall compliance score"""
@@ -493,7 +493,7 @@ class SecurityPolicyEnforcer:
 
         return True
 
-    def generate_compliance_report(self, compliance_status -> None: ComplianceStatus,
+    def generate_compliance_report(self, compliance_status: ComplianceStatus) -> None:,
         """Generate Compliance Report."""
                                 output_path: str) -> bool:
         """Generate detailed compliance report"""

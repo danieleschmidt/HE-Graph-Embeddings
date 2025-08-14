@@ -133,7 +133,7 @@ class HEGraphLogger:
             self.logger.addHandler(error_handler)
             self.logger.setLevel(logging.INFO)
 
-    def _log_with_context(self, level -> None: int, message: str, **kwargs):
+    def _log_with_context(self, level: int, message: str, **kwargs) -> None:
         """Log message with current context"""
         extra = kwargs.pop('extra', {})
         if kwargs:
@@ -141,27 +141,27 @@ class HEGraphLogger:
 
         self.logger.log(level, message, extra=extra)
 
-    def debug(self, message -> None: str, **kwargs):
+    def debug(self, message: str, **kwargs) -> None:
         """Debug."""
         self._log_with_context(logging.DEBUG, message, **kwargs)
 
-    def info(self, message -> None: str, **kwargs):
+    def info(self, message: str, **kwargs) -> None:
         """Info."""
         self._log_with_context(logging.INFO, message, **kwargs)
 
-    def warning(self, message -> None: str, **kwargs):
+    def warning(self, message: str, **kwargs) -> None:
         """Warning."""
         self._log_with_context(logging.WARNING, message, **kwargs)
 
-    def error(self, message -> None: str, **kwargs):
+    def error(self, message: str, **kwargs) -> None:
         """Error."""
         self._log_with_context(logging.ERROR, message, **kwargs)
 
-    def critical(self, message -> None: str, **kwargs):
+    def critical(self, message: str, **kwargs) -> None:
         """Critical."""
         self._log_with_context(logging.CRITICAL, message, **kwargs)
 
-    def exception(self, message -> None: str, **kwargs):
+    def exception(self, message: str, **kwargs) -> None:
         """Log exception with traceback"""
         kwargs['exc_info'] = True
         self.error(message, **kwargs)
@@ -237,7 +237,7 @@ class PerformanceLogger:
 
         return duration
 
-    def checkpoint(self, name -> None: str, **metrics):
+    def checkpoint(self, name: str, **metrics) -> None:
         """Log intermediate checkpoint"""
         if self.start_time is None:
             raise ValueError("PerformanceLogger not started")
@@ -266,7 +266,7 @@ class SecurityLogger:
         """  Init  ."""
         self.logger = get_logger("security")
 
-    def authentication_attempt(self, user_id -> None: str, success: bool,
+    def authentication_attempt(self, user_id: str, success: bool,
         """Authentication Attempt."""
                             ip_address: str, user_agent: str = None):
         """Log authentication attempt"""
@@ -279,7 +279,7 @@ class SecurityLogger:
             user_agent=user_agent
         )
 
-    def access_attempt(self, user_id -> None: str, resource: str, action: str,
+    def access_attempt(self, user_id: str, resource: str, action: str,
         """Access Attempt."""
                         success: bool, reason: str = None):
         """Log access attempt"""
@@ -293,7 +293,7 @@ class SecurityLogger:
             reason=reason
         )
 
-    def suspicious_activity(self, description -> None: str, user_id: str = None,
+    def suspicious_activity(self, description: str, user_id: str = None,
         """Suspicious Activity."""
                             ip_address: str = None, **details):
         """Log suspicious activity"""
@@ -305,7 +305,7 @@ class SecurityLogger:
             **details
         )
 
-    def security_violation(self, violation_type -> None: str, description: str,
+    def security_violation(self, violation_type: str, description: str,
         """Security Violation."""
                             severity: str = "medium", **details):
         """Log security violation"""
@@ -325,7 +325,7 @@ class AuditLogger:
         """  Init  ."""
         self.logger = get_logger("audit")
 
-    def data_access(self, user_id -> None: str, data_type: str, operation: str,
+    def data_access(self, user_id: str, data_type: str, operation: str,
         """Data Access."""
                     record_count: int = None, **metadata):
         """Log data access"""
@@ -339,7 +339,7 @@ class AuditLogger:
             **metadata
         )
 
-    def model_training(self, user_id -> None: str, model_name: str,
+    def model_training(self, user_id: str, model_name: str,
         """Model Training."""
                         dataset_info: Dict[str, Any], **parameters):
         """Log model training"""
@@ -352,7 +352,7 @@ class AuditLogger:
             **parameters
         )
 
-    def encryption_operation(self, user_id -> None: str, operation: str,
+    def encryption_operation(self, user_id: str, operation: str,
         """Encryption Operation."""
                             data_size: int, context_name: str):
         """Log encryption operations"""

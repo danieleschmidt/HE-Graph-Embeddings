@@ -199,7 +199,7 @@ class DatabaseManager:
             pipe.reset()
             raise
 
-    def _setup_event_listeners(self, engine -> None: Engine):
+    def _setup_event_listeners(self, engine: Engine) -> None:):
         """Setup SQLAlchemy event listeners"""
 
         @event.listens_for(engine, "connect")

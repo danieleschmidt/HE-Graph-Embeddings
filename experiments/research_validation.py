@@ -499,7 +499,7 @@ class ResearchValidator:
 
         return results
 
-    def save_results(self, results -> None: Dict[str, Any]):
+    def save_results(self, results: Dict[str, Any]) -> None:
         """Save experimental results"""
         if self.config.save_raw_data:
             with open(self.output_dir / 'comprehensive_results.json', 'w') as f:
@@ -524,7 +524,7 @@ class ResearchValidator:
         else:
             return obj
 
-    def generate_publication_plots(self, results -> None: Dict[str, Any]):
+    def generate_publication_plots(self, results: Dict[str, Any]) -> None:
         """Generate publication-ready plots"""
         if not self.config.save_plots:
             return
@@ -546,7 +546,7 @@ class ResearchValidator:
 
         logger.info(f"Publication plots saved to {self.output_dir}")
 
-    def _plot_scalability(self, scalability_results -> None: Dict[str, Any]):
+    def _plot_scalability(self, scalability_results: Dict[str, Any]) -> None:
         """Plot scalability results"""
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 12))
 
@@ -613,7 +613,7 @@ class ResearchValidator:
         plt.savefig(self.output_dir / 'scalability_analysis.png', dpi=300, bbox_inches='tight')
         plt.close()
 
-    def _plot_graph_types(self, graph_type_results -> None: Dict[str, Any]):
+    def _plot_graph_types(self, graph_type_results: Dict[str, Any]) -> None:
         """Plot graph type performance comparison"""
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 12))
 
@@ -690,7 +690,7 @@ class ResearchValidator:
         plt.savefig(self.output_dir / 'graph_type_analysis.png', dpi=300, bbox_inches='tight')
         plt.close()
 
-    def _plot_density_impact(self, density_results -> None: Dict[str, Any]):
+    def _plot_density_impact(self, density_results: Dict[str, Any]) -> None:
         """Plot density impact analysis"""
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
 
@@ -724,7 +724,7 @@ class ResearchValidator:
         plt.savefig(self.output_dir / 'density_impact_analysis.png', dpi=300, bbox_inches='tight')
         plt.close()
 
-    def _plot_feature_dimensions(self, feature_results -> None: Dict[str, Any]):
+    def _plot_feature_dimensions(self, feature_results: Dict[str, Any]) -> None:
         """Plot feature dimension impact"""
         fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 6))
 
@@ -777,7 +777,7 @@ class ResearchValidator:
         plt.savefig(self.output_dir / 'feature_dimension_analysis.png', dpi=300, bbox_inches='tight')
         plt.close()
 
-    def generate_summary_report(self, results -> None: Dict[str, Any]):
+    def generate_summary_report(self, results: Dict[str, Any]) -> None:
         """Generate comprehensive summary report"""
         report_path = self.output_dir / 'research_summary_report.md'
 

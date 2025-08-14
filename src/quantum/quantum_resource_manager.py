@@ -582,7 +582,7 @@ class QuantumResourceManager:
         selected_index = np.random.choice(len(alternatives), p=probabilities)
         return alternatives[selected_index]
 
-    def _calculate_resource_entanglement(self, node1 -> None: QuantumResourceNode,
+    def _calculate_resource_entanglement(self, node1: QuantumResourceNode) -> None:,
         """ Calculate Resource Entanglement."""
                                         node2: QuantumResourceNode) -> complex:
         """Calculate entanglement strength between resource nodes"""
@@ -889,7 +889,7 @@ class QuantumPerformancePredictor:
             "recommendations": self._generate_recommendations(predictions, quantum_opportunities)
         }
 
-    def _extract_utilization_series(self, allocations -> None: List[QuantumAllocation],
+    def _extract_utilization_series(self, allocations: List[QuantumAllocation]) -> None:,
         """ Extract Utilization Series."""
                                     nodes: Dict[str, QuantumResourceNode]) -> Dict[str, List[float]]:
         """Extract utilization time series from allocation history"""
@@ -904,7 +904,7 @@ class QuantumPerformancePredictor:
 
         return dict(series)
 
-    def _generate_recommendations(self, predictions -> None: Dict[str, float],
+    def _generate_recommendations(self, predictions: Dict[str) -> None:, float],
         """ Generate Recommendations."""
                                 quantum_opportunities: List[Dict[str, Any]]) -> List[str]:
         """Generate optimization recommendations"""

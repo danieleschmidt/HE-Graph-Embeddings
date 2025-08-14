@@ -264,7 +264,7 @@ class SecurityScanner:
         except Exception as e:
             logger.warning(f"Error scanning git secrets: {e}")
 
-    def _check_secrets(self, file_path -> None: Path, content: str):
+    def _check_secrets(self, file_path: Path, content: str) -> None:
         """Check for hardcoded secrets"""
         lines = content.split('\n')
 
@@ -283,7 +283,7 @@ class SecurityScanner:
                         "CWE-798"
                     )
 
-    def _check_vulnerabilities(self, file_path -> None: Path, content: str):
+    def _check_vulnerabilities(self, file_path: Path, content: str) -> None:
         """Check for vulnerability patterns"""
         lines = content.split('\n')
 
@@ -308,7 +308,7 @@ class SecurityScanner:
                         self._get_cwe_id(vuln_name)
                     )
 
-    def _analyze_ast(self, file_path -> None: Path, tree: ast.AST, content: str):
+    def _analyze_ast(self, file_path: Path, tree: ast.AST, content: str) -> None:
         """Analyze Python AST for security issues"""
         lines = content.split('\n')
 
@@ -351,7 +351,7 @@ class SecurityScanner:
                             "CWE-676"
                         )
 
-    def _check_config_security(self, file_path -> None: Path, content: str):
+    def _check_config_security(self, file_path: Path, content: str) -> None:
         """Check configuration files for security issues"""
         lines = content.split('\n')
 
@@ -395,7 +395,7 @@ class SecurityScanner:
                         "CWE-16"
                     )
 
-    def _check_dockerfile_security(self, file_path -> None: Path, content: str):
+    def _check_dockerfile_security(self, file_path: Path, content: str) -> None:
         """Check Dockerfile for security issues"""
         lines = content.split('\n')
 
@@ -422,7 +422,7 @@ class SecurityScanner:
                         "CWE-16"
                     )
 
-    def _check_dependency_security(self, file_path -> None: Path, content: str):
+    def _check_dependency_security(self, file_path: Path, content: str) -> None:
         """Check dependencies for known vulnerabilities"""
         lines = content.split('\n')
 
@@ -457,7 +457,7 @@ class SecurityScanner:
                     "CWE-937"
                 )
 
-    def _check_git_secrets(self, file_path -> None: Path):
+    def _check_git_secrets(self, file_path: Path) -> None:
         """Check git-tracked files for secrets"""
         try:
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
@@ -484,10 +484,10 @@ class SecurityScanner:
 
         return False
 
-    def _add_finding(self, finding_id -> None: str, title: str, description: str,
-        """ Add Finding."""
+    def _add_finding(self, finding_id: str, title: str, description: str,
                     severity: SecurityLevel, file_path: str, line_number: int,
-                    code_snippet: str, recommendation: str, cwe_id: str = None):
+                    code_snippet: str, recommendation: str, cwe_id: str = None) -> None:
+        """ Add Finding."""
         """Add a security finding"""
         finding = SecurityFinding(
             id=finding_id,

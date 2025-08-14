@@ -86,7 +86,7 @@ class MetricsPrediction:
         self.last_training = 0
         self.training_interval = 3600  # Retrain every hour
 
-    def add_metrics(self, metrics -> None: ScalingMetrics):
+    def add_metrics(self, metrics: ScalingMetrics) -> None:
         """Add metrics to history"""
         self.metrics_history.append(metrics)
 
@@ -315,7 +315,7 @@ class ScalingDecisionEngine:
 
         return False, "resources_in_use", 0
 
-    def record_scaling_action(self, action -> None: str, instances_before: int,
+    def record_scaling_action(self, action: str, instances_before: int,
         """Record Scaling Action."""
                             instances_after: int, reason: str):
         """Record scaling action for future reference"""
@@ -360,7 +360,7 @@ class AutoScaler:
 
         logger.info("AutoScaler initialized")
 
-    def register_scaling_callback(self, callback -> None: Callable[[str, int, str], None]):
+    def register_scaling_callback(self, callback: Callable[[str, int, str], None]) -> None:
         """Register callback for scaling events"""
         self.scaling_callbacks.append(callback)
 
@@ -474,7 +474,7 @@ class AutoScaler:
             throughput=throughput
         )
 
-    def _evaluate_scaling(self, metrics -> None: ScalingMetrics):
+    def _evaluate_scaling(self, metrics: ScalingMetrics) -> None:
         """Evaluate and execute scaling decisions"""
         current_instances = self.current_instances
 
@@ -491,7 +491,7 @@ class AutoScaler:
             new_instances = max(current_instances - down_amount, self.policy.min_instances)
             self._execute_scaling("scale_down", new_instances, down_reason)
 
-    def _execute_scaling(self, action -> None: str, target_instances: int, reason: str):
+    def _execute_scaling(self, action: str, target_instances: int, reason: str) -> None:
         """Execute scaling action"""
         current_instances = self.current_instances
 
@@ -533,11 +533,11 @@ class AutoScaler:
         # e.g., scale up during business hours, scale down at night
         return False
 
-    def _execute_scheduled_policy(self, policy -> None: Dict):
+    def _execute_scheduled_policy(self, policy: Dict) -> None:
         """Execute scheduled scaling policy"""
         pass  # Implement scheduled scaling logic
 
-    def _record_metrics(self, metrics -> None: ScalingMetrics):
+    def _record_metrics(self, metrics: ScalingMetrics) -> None:
         """Record metrics for monitoring and analysis"""
         if get_health_checker():
             collector = get_health_checker().metric_collector
@@ -547,7 +547,7 @@ class AutoScaler:
             collector.record("autoscale.queue_depth", metrics.queue_depth)
             collector.record("autoscale.active_instances", self.current_instances)
 
-    def add_scheduled_policy(self, policy -> None: Dict):
+    def add_scheduled_policy(self, policy: Dict) -> None:
         """Add scheduled scaling policy"""
         self.scheduled_policies.append(policy)
 

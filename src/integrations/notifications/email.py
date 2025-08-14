@@ -374,12 +374,12 @@ class EmailNotificationScheduler:
         """Schedule weekly summary report"""
         logger.info(f"Scheduled weekly summaries for {len(to_emails)} recipients on day {day_of_week}")
 
-    def add_alert_subscription(self, email -> None: str, alert_types: List[str]):
+    def add_alert_subscription(self, email: str) -> None:, alert_types: List[str]):
         """Add email to alert subscriptions"""
         # This would integrate with a database to store subscriptions
         logger.info(f"Added {email} to alerts: {alert_types}")
 
-    def remove_alert_subscription(self, email -> None: str, alert_types: List[str]):
+    def remove_alert_subscription(self, email: str) -> None:, alert_types: List[str]):
         """Remove email from alert subscriptions"""
         logger.info(f"Removed {email} from alerts: {alert_types}")
 

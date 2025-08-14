@@ -61,7 +61,7 @@ class MetricCollector:
         self.metrics = defaultdict(deque)
         self.lock = threading.Lock()
 
-    def record(self, metric_name -> None: str, value: float, timestamp: datetime = None):
+    def record(self, metric_name: str, value: float, timestamp: datetime = None) -> None:
         """Record a metric value"""
         timestamp = timestamp or datetime.utcnow()
 
@@ -94,8 +94,7 @@ class MetricCollector:
 
             return sum(recent_values) / len(recent_values) if recent_values else None
 
-    def get_percentile(self, metric_name -> None: str, percentile: int = 95,
-        """Get Percentile."""
+    def get_percentile(self, metric_name: str, percentile: int = 95,
                         window_minutes: int = 5) -> Optional[float]:
         """Get percentile value over time window"""
 
@@ -123,7 +122,7 @@ class SystemMonitor:
         self.monitoring = False
         self.monitor_thread = None
 
-    def start_monitoring(self, interval -> None: float = 5.0):
+    def start_monitoring(self, interval: float = 5.0) -> None:
         """Start background monitoring"""
         if self.monitoring:
             return
@@ -144,7 +143,7 @@ class SystemMonitor:
             self.monitor_thread.join(timeout=10)
         logger.info("System monitoring stopped")
 
-    def _monitor_loop(self, interval -> None: float):
+    def _monitor_loop(self, interval: float) -> None:
         """Background monitoring loop"""
         while self.monitoring:
             try:
@@ -256,7 +255,7 @@ class ApplicationMonitor:
         self.active_contexts = {}
         self.active_models = {}
 
-    def record_request(self, duration_ms -> None: float, status_code: int):
+    def record_request(self, duration_ms: float, status_code: int) -> None:
         """Record API request metrics"""
         self.request_count += 1
         self.metric_collector.record("api.request_duration_ms", duration_ms)
@@ -266,9 +265,8 @@ class ApplicationMonitor:
             self.error_count += 1
             self.metric_collector.record("api.error_rate", 1)
 
-    def record_encryption_operation(self, operation -> None: str, duration_ms: float,
-        """Record Encryption Operation."""
-                                    data_size: int, success: bool):
+    def record_encryption_operation(self, operation: str, duration_ms: float,
+                                    data_size: int, success: bool) -> None:
         """Record encryption operation metrics"""
         self.metric_collector.record(f"encryption.{operation}_duration_ms", duration_ms)
         self.metric_collector.record(f"encryption.{operation}_throughput_mb_per_sec",
@@ -277,9 +275,8 @@ class ApplicationMonitor:
         if not success:
             self.metric_collector.record(f"encryption.{operation}_error_rate", 1)
 
-    def record_model_inference(self, model_name -> None: str, duration_ms: float,
-        """Record Model Inference."""
-                            batch_size: int, success: bool):
+    def record_model_inference(self, model_name: str, duration_ms: float,
+                            batch_size: int, success: bool) -> None:
         """Record model inference metrics"""
         self.metric_collector.record(f"model.{model_name}_inference_duration_ms", duration_ms)
         self.metric_collector.record(f"model.{model_name}_throughput",
@@ -288,25 +285,25 @@ class ApplicationMonitor:
         if not success:
             self.metric_collector.record(f"model.{model_name}_error_rate", 1)
 
-    def add_context(self, name -> None: str, context_info: Dict[str, Any]):
+    def add_context(self, name: str, context_info: Dict[str, Any]) -> None:
         """Add active CKKS context"""
         self.active_contexts[name] = {
             **context_info,
             "created_at": datetime.utcnow()
         }
 
-    def remove_context(self, name -> None: str):
+    def remove_context(self, name: str) -> None:
         """Remove active CKKS context"""
         self.active_contexts.pop(name, None)
 
-    def add_model(self, name -> None: str, model_info: Dict[str, Any]):
+    def add_model(self, name: str, model_info: Dict[str, Any]) -> None:
         """Add active model"""
         self.active_models[name] = {
             **model_info,
             "created_at": datetime.utcnow()
         }
 
-    def remove_model(self, name -> None: str):
+    def remove_model(self, name: str) -> None:
         """Remove active model"""
         self.active_models.pop(name, None)
 
@@ -362,7 +359,7 @@ class HealthChecker:
         self.system_monitor = SystemMonitor(self.metric_collector)
         self.app_monitor = ApplicationMonitor(self.metric_collector)
 
-    def register_health_check(self, name -> None: str, check_func: Callable[[], HealthCheckResult]):
+    def register_health_check(self, name: str, check_func: Callable[[], HealthCheckResult]) -> None:
         """Register a custom health check"""
         self.health_checks[name] = check_func
 
