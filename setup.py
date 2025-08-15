@@ -20,8 +20,8 @@ class CMakeBuild(build_ext):
         """Run."""
         try:
             subprocess.check_output(['cmake', '--version'])
-        except OSError:
-            logger.error(f"Error in operation: {e}")
+        except OSError as e:
+            print(f"Error in operation: {e}")
             raise RuntimeError("CMake must be installed to build the extensions")
 
         for ext in self.extensions:
