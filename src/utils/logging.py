@@ -267,8 +267,8 @@ class SecurityLogger:
         self.logger = get_logger("security")
 
     def authentication_attempt(self, user_id: str, success: bool,
-        """Authentication Attempt."""
                             ip_address: str, user_agent: str = None):
+        """Authentication Attempt."""
         """Log authentication attempt"""
         self.logger.info(
             f"Authentication {'successful' if success else 'failed'}",

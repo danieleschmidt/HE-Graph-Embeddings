@@ -71,22 +71,22 @@ class GraphPackerBase(ABC):
         self.device = torch.device('cuda' if torch.cuda.is_available() and config.gpu_acceleration else 'cpu')
 
     @abstractmethod
-    def pack_nodes(self, node_features: torch.Tensor) -> None:,
-        """Pack Nodes."""
+    def pack_nodes(self, node_features: torch.Tensor,
                     edge_index: torch.Tensor) -> Tuple[List[torch.Tensor], Dict[str, Any]]:
+        """Pack Nodes."""
         """Pack node features into ciphertext-ready tensors"""
         pass
 
     @abstractmethod
-    def unpack_nodes(self, packed_tensors: List[torch.Tensor]) -> None:,
-        """Unpack Nodes."""
+    def unpack_nodes(self, packed_tensors: List[torch.Tensor],
                     packing_info: Dict[str, Any]) -> torch.Tensor:
+        """Unpack Nodes."""
         """Unpack ciphertext tensors back to node features"""
         pass
 
-    def compute_packing_metrics(self, edge_index: torch.Tensor) -> None:,
-        """Compute Packing Metrics."""
+    def compute_packing_metrics(self, edge_index: torch.Tensor,
                                 packing_info: Dict[str, Any]) -> PackingMetrics:
+        """Compute Packing Metrics."""
         """Compute metrics for evaluating packing quality"""
         node_to_pack = packing_info['node_to_pack']
         pack_assignments = packing_info['pack_assignments']
