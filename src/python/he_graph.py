@@ -219,9 +219,9 @@ class CKKSContext:
             self
         )
 
-    def _relinearize(self, c0: torch.Tensor) -> None:, c1: torch.Tensor,
-        """ Relinearize."""
+    def _relinearize(self, c0: torch.Tensor, c1: torch.Tensor,
                     c2: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """ Relinearize."""
         """Relinearization to reduce ciphertext size"""
         if self._relin_keys is None:
             raise RuntimeError("Relinearization keys not generated")

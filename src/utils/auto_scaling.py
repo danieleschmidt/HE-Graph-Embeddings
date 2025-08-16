@@ -316,8 +316,8 @@ class ScalingDecisionEngine:
         return False, "resources_in_use", 0
 
     def record_scaling_action(self, action: str, instances_before: int,
-        """Record Scaling Action."""
                             instances_after: int, reason: str):
+        """Record Scaling Action."""
         """Record scaling action for future reference"""
         scaling_record = {
             "timestamp": time.time(),

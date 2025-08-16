@@ -154,10 +154,17 @@ class CircuitBreaker:
         timeout = timeout or self.config.timeout_duration
 
         try:
-            # TODO: Implement actual timeout mechanism
-            result = func(*args, **kwargs)
-            self._on_success(time.time() - start_time)
-            return result
+            # Implement timeout mechanism with concurrent futures
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(func, *args, **kwargs)
+                try:
+                    result = future.result(timeout=timeout)
+                    self._on_success(time.time() - start_time)
+                    return result
+                except concurrent.futures.TimeoutError:
+                    logger.error(f"Circuit breaker '{self.name}' timeout after {timeout}s")
+                    raise TimeoutError(f"Function execution exceeded timeout of {timeout}s")
 
         except Exception as e:
             logger.error(f"Error in operation: {e}")
@@ -366,8 +373,8 @@ def get_all_circuit_breakers() -> Dict[str, Dict[str, Any]]:
 
 # Decorator for automatic circuit breaker protection
 def circuit_breaker_protected(name: str, config: CircuitBreakerConfig = None,
-    """Circuit Breaker Protected."""
                             timeout: float = None):
+    """Circuit Breaker Protected."""
     """Decorator to protect function with circuit breaker"""
     def decorator(func: Callable) -> Callable:
         """Decorator."""

@@ -24,8 +24,8 @@ class ErrorSeverity(Enum):
 class HEGraphError(Exception):
     """Base exception for HE-Graph-Embeddings"""
     def __init__(self, message: str, error_code: str = None,
-        """  Init  ."""
                 details: Dict[str, Any] = None, severity: ErrorSeverity = ErrorSeverity.MEDIUM):
+        """  Init  ."""
         super().__init__(message)
         self.message = message
         self.error_code = error_code or self.__class__.__name__

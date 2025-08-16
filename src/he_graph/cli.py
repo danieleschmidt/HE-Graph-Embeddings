@@ -19,14 +19,19 @@ try:
         CKKSContext, HEConfig, HEGraphSAGE, HEGAT,
         SecurityEstimator, NoiseTracker
     )
-except ImportError:
-    logger.error(f"Error in operation: {e}")
+    from .quantum_he_softmax import QuantumEnhancedHESoftmax, HEGraphAttention
+except ImportError as e:
+    print(f"Import error: {e}")
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
     from python.he_graph import (
         CKKSContext, HEConfig, HEGraphSAGE, HEGAT,
         SecurityEstimator, NoiseTracker
     )
+    from quantum_he_softmax import QuantumEnhancedHESoftmax, HEGraphAttention
+    from robust_error_handling import get_system_health, reset_health_metrics
+    from he_health_monitor import get_he_health_status, get_he_recommendations
+    from config_validator import EnhancedConfigValidator, DeploymentEnvironment, PerformanceProfile
 
 
 import numpy as np
@@ -293,6 +298,400 @@ def security_mode(args):
         except Exception as e:
             print(f"   Depth {depth:2d}: {e}")
 
+
+def quantum_test_mode(args):
+    """Test quantum-enhanced homomorphic operations"""
+    print("🚀 Quantum-Enhanced HE Test Mode")
+    print("=" * 50)
+    
+    print(f"\n1. Testing Quantum-Enhanced Softmax (Order {args.order})...")
+    
+    # Initialize quantum softmax
+    quantum_softmax = QuantumEnhancedHESoftmax(
+        approximation_order=args.order,
+        quantum_enhancement=True
+    )
+    
+    # Test with various input patterns
+    test_cases = [
+        ("Random inputs", torch.randn(args.nodes, 10)),
+        ("Large values", torch.randn(args.nodes, 10) * 5),
+        ("Small values", torch.randn(args.nodes, 10) * 0.1),
+        ("Uniform inputs", torch.ones(args.nodes, 10)),
+    ]
+    
+    print("   Testing approximation quality:")
+    total_error = 0
+    
+    for name, test_input in test_cases:
+        error = quantum_softmax.get_approximation_error(test_input)
+        total_error += error
+        print(f"   • {name}: MSE = {error:.6f}")
+    
+    avg_error = total_error / len(test_cases)
+    if avg_error < 0.01:
+        quality = "✅ EXCELLENT"
+    elif avg_error < 0.05:
+        quality = "✅ GOOD"
+    elif avg_error < 0.1:
+        quality = "⚠️  ACCEPTABLE"
+    else:
+        quality = "❌ POOR"
+    
+    print(f"   Average approximation error: {avg_error:.6f} {quality}")
+    
+    print(f"\n2. Testing HE Graph Attention...")
+    
+    # Create test graph
+    import torch
+    torch.manual_seed(42)  # For reproducible results
+    
+    # Generate random graph
+    num_nodes = args.nodes
+    features_dim = 64
+    x = torch.randn(num_nodes, features_dim)
+    
+    # Random edges (ensuring connectivity)
+    num_edges = min(num_nodes * 2, 100)  # Reasonable number of edges
+    edge_index = torch.randint(0, num_nodes, (2, num_edges))
+    
+    # Initialize HE Graph Attention
+    he_attention = HEGraphAttention(
+        in_features=features_dim,
+        out_features=features_dim,
+        heads=4,
+        use_quantum_softmax=True
+    )
+    
+    print(f"   Graph: {num_nodes} nodes, {num_edges} edges, {features_dim} features")
+    
+    # Forward pass timing
+    start_time = time.time()
+    try:
+        output = he_attention(x, edge_index)
+        forward_time = time.time() - start_time
+        
+        print(f"   ✅ Forward pass successful: {forward_time:.3f}s")
+        print(f"   Output shape: {output.shape}")
+        
+        # Basic sanity checks
+        assert output.shape == x.shape, "Output shape should match input"
+        assert not torch.isnan(output).any(), "Output should not contain NaN"
+        assert torch.isfinite(output).all(), "Output should be finite"
+        
+        print("   ✅ All sanity checks passed")
+        
+    except Exception as e:
+        print(f"   ❌ Forward pass failed: {e}")
+        return
+    
+    print(f"\n3. Performance Summary:")
+    print(f"   • Quantum softmax quality: {quality}")
+    print(f"   • Graph attention latency: {forward_time:.3f}s")
+    print(f"   • Nodes processed: {num_nodes}")
+    print(f"   • Features per node: {features_dim}")
+    
+    print(f"\n🎯 Generation 1 Test Complete!")
+    print("   This demonstrates basic quantum-enhanced HE functionality.")
+    print("   Ready for Generation 2 robustness enhancements!")
+
+
+def health_monitoring_mode(args):
+    """System health monitoring and diagnostics"""
+    print("🛡️ HE-Graph System Health Monitor")
+    print("=" * 50)
+    
+    if args.reset:
+        reset_health_metrics()
+        print("✅ Health metrics reset successfully")
+        return
+    
+    # Get overall system health
+    system_health = get_system_health()
+    print(f"\n📊 System Health Status: {system_health['status'].upper()}")
+    print(f"   • Uptime: {system_health['uptime_seconds']:.1f} seconds")
+    print(f"   • Success rate: {system_health['success_rate']:.2%}")
+    print(f"   • Total operations: {system_health['total_operations']}")
+    print(f"   • Total errors: {system_health['total_errors']}")
+    
+    # Get HE-specific health
+    try:
+        he_health = get_he_health_status()
+        print(f"\n🔐 HE Operations Health:")
+        print(f"   • Noise status: {he_health.get('noise_status', 'unknown').upper()}")
+        if he_health.get('noise_budget_remaining'):
+            print(f"   • Noise budget: {he_health['noise_budget_remaining']:.2f} bits")
+        print(f"   • Operations since refresh: {he_health.get('operations_since_refresh', 0)}")
+        print(f"   • Average operation time: {he_health.get('average_recent_duration', 0):.3f}s")
+        
+        # Get recommendations
+        recommendations = get_he_recommendations()
+        if recommendations:
+            print(f"\n💡 Optimization Recommendations ({len(recommendations)}):")
+            for rec in recommendations:
+                priority_icon = {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(rec['priority'], "ℹ️")
+                print(f"   {priority_icon} {rec['priority'].upper()}: {rec['message']}")
+        else:
+            print("\n✅ No optimization recommendations at this time")
+        
+    except ImportError:
+        print("\n⚠️  HE health monitoring not available (missing dependencies)")
+    except Exception as e:
+        print(f"\n❌ Error getting HE health status: {e}")
+    
+    # Export metrics if requested
+    if args.export:
+        try:
+            import json
+            from he_health_monitor import export_he_metrics
+            
+            metrics = export_he_metrics()
+            with open(args.export, 'w') as f:
+                json.dump(metrics, f, indent=2)
+            
+            print(f"\n📁 Health metrics exported to {args.export}")
+            
+        except Exception as e:
+            print(f"\n❌ Failed to export metrics: {e}")
+
+
+def config_validation_mode(args):
+    """Configuration validation and optimization"""
+    print("🛡️ HE Configuration Validation")
+    print("=" * 50)
+    
+    try:
+        validator = EnhancedConfigValidator()
+        
+        # Load configuration
+        if args.config_file:
+            try:
+                import json
+                with open(args.config_file, 'r') as f:
+                    config = json.load(f)
+                print(f"📁 Loaded configuration from {args.config_file}")
+            except Exception as e:
+                print(f"❌ Failed to load config file: {e}")
+                return
+        else:
+            # Use default configuration for validation
+            config = {
+                'poly_modulus_degree': 16384,
+                'coeff_modulus_bits': [50, 40, 40, 50],
+                'scale': 2**40,
+                'security_level': 128
+            }
+            print("📋 Using default configuration for validation")
+        
+        # Parse environment and profile
+        env_map = {
+            'development': DeploymentEnvironment.DEVELOPMENT,
+            'testing': DeploymentEnvironment.TESTING,
+            'staging': DeploymentEnvironment.STAGING,
+            'production': DeploymentEnvironment.PRODUCTION
+        }
+        
+        profile_map = {
+            'memory_optimized': PerformanceProfile.MEMORY_OPTIMIZED,
+            'speed_optimized': PerformanceProfile.SPEED_OPTIMIZED,
+            'balanced': PerformanceProfile.BALANCED,
+            'precision_optimized': PerformanceProfile.PRECISION_OPTIMIZED
+        }
+        
+        environment = env_map[args.environment]
+        profile = profile_map[args.profile]
+        
+        print(f"🎯 Target: {args.environment} environment, {args.profile} profile")
+        
+        # Validate configuration
+        result = validator.validate_he_config(config, environment, profile)
+        
+        # Display results
+        print(f"\n📊 Validation Results:")
+        if result.is_valid:
+            print("   ✅ Configuration is VALID")
+        else:
+            print("   ❌ Configuration is INVALID")
+        
+        if result.errors:
+            print(f"\n🚨 Errors ({len(result.errors)}):")
+            for error in result.errors:
+                print(f"   • {error}")
+        
+        if result.warnings:
+            print(f"\n⚠️  Warnings ({len(result.warnings)}):")
+            for warning in result.warnings:
+                print(f"   • {warning}")
+        
+        if result.recommendations:
+            print(f"\n💡 Recommendations ({len(result.recommendations)}):")
+            for rec in result.recommendations:
+                print(f"   • {rec}")
+        
+        # Show optimized configuration if available
+        if result.optimized_config:
+            print(f"\n🎯 Optimized Configuration:")
+            for key, value in result.optimized_config.items():
+                if key in config and config[key] != value:
+                    print(f"   • {key}: {config[key]} → {value}")
+                else:
+                    print(f"   • {key}: {value}")
+        
+        # Show recommended configuration for this environment/profile
+        print(f"\n🏆 Recommended Configuration for {args.environment} + {args.profile}:")
+        recommended = validator.get_recommended_config(environment, profile)
+        for key, value in recommended.items():
+            if key not in ['environment', 'performance_profile']:
+                print(f"   • {key}: {value}")
+        
+    except ImportError as e:
+        print(f"❌ Configuration validation not available: {e}")
+    except Exception as e:
+        print(f"❌ Validation failed: {e}")
+
+
+async def comprehensive_test_mode(args):
+    """Run comprehensive test suite"""
+    print("🔬 HE-Graph Comprehensive Testing Suite")
+    print("=" * 50)
+    
+    try:
+        from comprehensive_testing import (
+            ComprehensiveTestRunner, TestCategory,
+            create_integration_test_suite, create_performance_test_suite, create_security_test_suite
+        )
+        
+        # Parse categories
+        categories = None
+        if args.categories:
+            categories = [TestCategory(cat) for cat in args.categories]
+            print(f"🎯 Running categories: {', '.join(args.categories)}")
+        else:
+            print("🎯 Running all test categories")
+        
+        # Create test runner
+        runner = ComprehensiveTestRunner(
+            max_parallel_tests=args.max_workers,
+            enable_monitoring=True
+        )
+        
+        # Register test suites
+        print(f"\n📋 Registering test suites...")
+        runner.register_test_suite(create_integration_test_suite())
+        runner.register_test_suite(create_performance_test_suite()) 
+        runner.register_test_suite(create_security_test_suite())
+        
+        print(f"✅ Registered {len(runner.test_suites)} test suites")
+        
+        # Run tests
+        print(f"\n🚀 Starting test execution...")
+        start_time = time.time()
+        
+        report = await runner.run_all_tests(
+            categories=categories,
+            parallel=args.parallel
+        )
+        
+        execution_time = time.time() - start_time
+        
+        # Display results
+        print(f"\n" + "="*60)
+        print("📊 TEST EXECUTION SUMMARY")
+        print("="*60)
+        
+        summary = report['summary']
+        print(f"⏱️  Execution Time: {execution_time:.2f}s")
+        print(f"📈 Total Tests: {summary['total_tests']}")
+        print(f"✅ Passed: {summary['passed_tests']}")
+        print(f"❌ Failed: {summary['failed_tests']}")
+        print(f"🎯 Success Rate: {summary['success_rate']:.2%}")
+        print(f"⚡ Avg Duration: {summary['average_duration']:.3f}s per test")
+        
+        # Category breakdown
+        if report['results_by_category']:
+            print(f"\n📋 Results by Category:")
+            for category, count in report['results_by_category'].items():
+                print(f"   • {category.title()}: {count} tests")
+        
+        # Severity breakdown
+        if report['results_by_severity']:
+            print(f"\n⚠️  Results by Severity:")
+            severity_icons = {
+                'pass': '✅', 'warning': '⚠️', 'fail': '❌', 'critical': '🚨'
+            }
+            for severity, count in report['results_by_severity'].items():
+                icon = severity_icons.get(severity, '❓')
+                print(f"   {icon} {severity.title()}: {count}")
+        
+        # Failed test details
+        failed_results = [
+            r for r in report['detailed_results'] 
+            if r['severity'] in ['fail', 'critical']
+        ]
+        
+        if failed_results:
+            print(f"\n🚨 Failed Test Details:")
+            for result in failed_results:
+                print(f"   • {result['test_name']}: {result['message']}")
+                if result.get('details'):
+                    for key, value in result['details'].items():
+                        print(f"     - {key}: {value}")
+        
+        # Performance insights
+        if 'performance' in report['results_by_category']:
+            perf_results = [
+                r for r in report['detailed_results'] 
+                if r['category'] == 'performance'
+            ]
+            if perf_results:
+                print(f"\n⚡ Performance Insights:")
+                for result in perf_results:
+                    if result['severity'] == 'pass':
+                        print(f"   ✅ {result['test_name']}: {result['message']}")
+                    else:
+                        print(f"   ⚠️  {result['test_name']}: {result['message']}")
+        
+        # Overall assessment
+        overall_status = "PASS" if summary['success_rate'] >= 0.8 else "FAIL"
+        status_icon = "✅" if overall_status == "PASS" else "❌"
+        
+        print(f"\n{status_icon} OVERALL STATUS: {overall_status}")
+        
+        if summary['success_rate'] >= 0.95:
+            print("🏆 Excellent! All systems operating optimally.")
+        elif summary['success_rate'] >= 0.8:
+            print("👍 Good! Most systems functioning correctly.")
+        elif summary['success_rate'] >= 0.6:
+            print("⚠️  Warning! Some systems need attention.")
+        else:
+            print("🚨 Critical! Multiple system failures detected.")
+        
+        # Save results if requested
+        if args.output:
+            try:
+                import json
+                with open(args.output, 'w') as f:
+                    json.dump(report, f, indent=2)
+                print(f"\n📁 Results saved to {args.output}")
+            except Exception as e:
+                print(f"\n❌ Failed to save results: {e}")
+        
+        print("="*60)
+        
+        # Return non-zero exit code if tests failed
+        if overall_status == "FAIL":
+            import sys
+            sys.exit(1)
+        
+    except ImportError as e:
+        print(f"❌ Comprehensive testing not available: {e}")
+        print("   Make sure all dependencies are installed.")
+    except Exception as e:
+        print(f"❌ Test execution failed: {e}")
+        import traceback
+        traceback.print_exc()
+
+
 def main():
     """Main CLI entry point"""
     parser = argparse.ArgumentParser(
@@ -326,6 +725,41 @@ Examples:
 
     # Security command
     security_parser = subparsers.add_parser('security', help='Analyze security parameters')
+    
+    # Quantum test command (Generation 1 addition)
+    quantum_parser = subparsers.add_parser('quantum-test', help='Test quantum-enhanced features')
+    quantum_parser.add_argument('--order', type=int, default=3,
+                               help='Polynomial approximation order (default: 3)')
+    quantum_parser.add_argument('--nodes', type=int, default=50,
+                               help='Number of nodes for test graph (default: 50)')
+    
+    # Health monitoring command (Generation 2 addition)
+    health_parser = subparsers.add_parser('health', help='System health monitoring and diagnostics')
+    health_parser.add_argument('--export', type=str,
+                              help='Export health metrics to JSON file')
+    health_parser.add_argument('--reset', action='store_true',
+                              help='Reset health monitoring metrics')
+    
+    # Config validation command (Generation 2 addition)
+    config_parser = subparsers.add_parser('validate-config', help='Validate HE configuration')
+    config_parser.add_argument('--config-file', type=str,
+                              help='JSON file containing HE configuration')
+    config_parser.add_argument('--environment', choices=['development', 'testing', 'staging', 'production'],
+                              default='production', help='Deployment environment')
+    config_parser.add_argument('--profile', choices=['memory_optimized', 'speed_optimized', 'balanced', 'precision_optimized'],
+                              default='balanced', help='Performance profile')
+    
+    # Comprehensive testing command (Generation 3 addition)
+    test_parser = subparsers.add_parser('test', help='Run comprehensive test suite')
+    test_parser.add_argument('--categories', nargs='+', 
+                            choices=['unit', 'integration', 'performance', 'security', 'stress', 'compatibility'],
+                            help='Test categories to run (default: all)')
+    test_parser.add_argument('--parallel', action='store_true', default=True,
+                            help='Run tests in parallel (default: True)')
+    test_parser.add_argument('--output', type=str,
+                            help='Output file for test results JSON')
+    test_parser.add_argument('--max-workers', type=int, default=4,
+                            help='Maximum parallel test workers')
 
     # Parse arguments
     args = parser.parse_args()
@@ -341,6 +775,15 @@ Examples:
             benchmark_mode(args)
         elif args.command == 'security':
             security_mode(args)
+        elif args.command == 'quantum-test':
+            quantum_test_mode(args)
+        elif args.command == 'health':
+            health_monitoring_mode(args)
+        elif args.command == 'validate-config':
+            config_validation_mode(args)
+        elif args.command == 'test':
+            import asyncio
+            asyncio.run(comprehensive_test_mode(args))
     except KeyboardInterrupt:
         print("\n\n⚠️  Operation cancelled by user")
         sys.exit(1)

@@ -410,8 +410,8 @@ class EncryptionCache:
         self.context_cache = {}  # Cache CKKS contexts
 
     def cache_encrypted_tensor(self, key: str, encrypted_tensor: Any,
-        """Cache Encrypted Tensor."""
                                 context_name: str = "default") -> bool:
+        """Cache Encrypted Tensor."""
         """Cache encrypted tensor with context reference"""
         cache_key = f"{context_name}_{key}"
         return self.cache.put(cache_key, encrypted_tensor)

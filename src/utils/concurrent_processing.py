@@ -346,8 +346,8 @@ class WorkerPool:
             logger.info("Worker pool stopped")
 
     def submit(self, func: Callable, *args, priority: int = 1, timeout: float = None,
-        """Submit."""
                 max_retries: int = 3, callback: Callable = None, **kwargs) -> concurrent.futures.Future:
+        """Submit."""
         """Submit work to the pool"""
         if not self.running:
             raise HEGraphError("Worker pool is not running")

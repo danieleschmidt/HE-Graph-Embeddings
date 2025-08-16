@@ -313,9 +313,9 @@ class ComplianceManager:
             )
         }
 
-    def register_data_subject(self, subject_id: str) -> None:, region: str, frameworks: List[ComplianceFramework],
-        """Register Data Subject."""
+    def register_data_subject(self, subject_id: str, region: str, frameworks: List[ComplianceFramework],
                             data_categories: Set[DataCategory], is_minor: bool = False) -> DataSubject:
+        """Register Data Subject."""
         """Register a data subject for compliance tracking"""
 
         data_subject = DataSubject(

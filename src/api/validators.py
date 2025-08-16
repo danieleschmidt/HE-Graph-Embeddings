@@ -102,9 +102,9 @@ class GraphDataValidator:
 
     @staticmethod
     def validate_graph_structure(node_features: List[List[float]],
-        """Validate Graph Structure."""
                                 edge_index: List[List[int]],
                                 edge_attributes: Optional[List[List[float]]] = None) -> Tuple[bool, Optional[str]]:
+        """Validate Graph Structure."""
         """Validate complete graph structure"""
         # Validate node features
         valid, error = GraphDataValidator.validate_node_features(node_features)
@@ -201,8 +201,8 @@ class ModelConfigValidator:
 
     @staticmethod
     def validate_dimensions(in_channels: int, hidden_channels: List[int],
-        """Validate Dimensions."""
                             out_channels: int) -> Tuple[bool, Optional[str]]:
+        """Validate Dimensions."""
         """Validate model dimensions"""
         if in_channels <= 0:
             return False, "Input channels must be positive"
@@ -233,8 +233,8 @@ class ModelConfigValidator:
 
     @staticmethod
     def validate_training_params(learning_rate: float, epochs: int,
-        """Validate Training Params."""
                                 batch_size: int, dropout: float) -> Tuple[bool, Optional[str]]:
+        """Validate Training Params."""
         """Validate training parameters"""
         if learning_rate <= 0 or learning_rate > 1:
             return False, "Learning rate must be in (0, 1]"
@@ -252,8 +252,8 @@ class ModelConfigValidator:
 
     @staticmethod
     def validate_encryption_params(poly_degree: int, coeff_modulus_bits: List[int],
-        """Validate Encryption Params."""
                                 scale: float, security_level: int) -> Tuple[bool, Optional[str]]:
+        """Validate Encryption Params."""
         """Validate CKKS encryption parameters"""
         # Check poly_degree is power of 2
         if poly_degree <= 0 or (poly_degree & (poly_degree - 1)) != 0:

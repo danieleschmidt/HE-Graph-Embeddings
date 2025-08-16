@@ -64,12 +64,17 @@ try:
 except ImportError:
     logger.error(f"Error in operation: {e}")
     # Development fallbacks
-    class BreakthroughAlgorithmBenchmark: pass
+    class BreakthroughAlgorithmBenchmark:
         """BreakthroughAlgorithmBenchmark class."""
-    class BreakthroughMetrics: pass
+        pass
+    
+    class BreakthroughMetrics:
         """BreakthroughMetrics class."""
-    class AlgorithmType: pass
+        pass
+    
+    class AlgorithmType:
         """AlgorithmType class."""
+        pass
     class QuantumTaskScheduler: pass
         """QuantumTaskScheduler class."""
     class QuantumResourceManager: pass
