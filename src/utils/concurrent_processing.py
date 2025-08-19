@@ -347,7 +347,6 @@ class WorkerPool:
 
     def submit(self, func: Callable, *args, priority: int = 1, timeout: float = None,
                 max_retries: int = 3, callback: Callable = None, **kwargs) -> concurrent.futures.Future:
-        """Submit."""
         """Submit work to the pool"""
         if not self.running:
             raise HEGraphError("Worker pool is not running")
@@ -630,7 +629,6 @@ class AutoScaler:
         self.scaling_history = deque(maxlen=10)
 
     def should_scale_up(self, current_workers: int, queue_utilization: float,
-        """Should Scale Up."""
                         avg_worker_load: float) -> bool:
         """Check if should scale up"""
         if current_workers >= self.config.max_workers:
@@ -643,7 +641,6 @@ class AutoScaler:
                 avg_worker_load > self.config.scale_up_threshold)
 
     def should_scale_down(self, current_workers: int, queue_utilization: float,
-        """Should Scale Down."""
                         avg_worker_load: float) -> bool:
         """Check if should scale down"""
         if current_workers <= self.config.min_workers:

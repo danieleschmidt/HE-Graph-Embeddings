@@ -1,16 +1,22 @@
 {
-  "timestamp": "2025-08-18T14:36:48.040813",
-  "overall_score": 0.8180555555555555,
-  "passed": false,
-  "execution_time": 0.20084261894226074,
+  "timestamp": "2025-08-19T22:09:51.814043",
+  "overall_score": 0.8698868657941293,
+  "passed": true,
+  "execution_time": 0.7324259281158447,
   "metrics": {
     "code_quality": {
-      "score": 0.5,
-      "details": {},
-      "issues": [
-        "Code quality analysis failed: name 'e' is not defined"
-      ],
-      "recommendations": []
+      "score": 0.6853491753000556,
+      "details": {
+        "complexity_score": 1.0,
+        "style_score": 0.9948078920041536,
+        "docstring_score": 0.9186046511627907,
+        "import_score": 0.18000000000000008,
+        "error_handling_score": 0.3333333333333333
+      },
+      "issues": [],
+      "recommendations": [
+        "Improve code complexity and maintainability"
+      ]
     },
     "security": {
       "score": 0.9375,
@@ -24,15 +30,14 @@
       "recommendations": []
     },
     "performance": {
-      "score": 0.7,
+      "score": 0.8256386861313869,
       "details": {
         "algorithmic_complexity": 0.85,
         "memory_efficiency": 0.8,
-        "io_efficiency": 0.9
+        "io_efficiency": 0.9,
+        "concurrency_score": 0.7525547445255474
       },
-      "issues": [
-        "Performance analysis failed: name 'e' is not defined"
-      ],
+      "issues": [],
       "recommendations": []
     },
     "research": {

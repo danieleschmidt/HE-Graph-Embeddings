@@ -18,6 +18,13 @@ import argparse
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
+# Import logging utilities
+import logging
+
+# Initialize logger  
+logger = logging.getLogger("quality_gates")
+logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s:%(message)s')
+
 @dataclass
 class QualityGateResult:
     """Result of a quality gate check"""
@@ -113,7 +120,7 @@ class QualityGatesOrchestrator:
         try:
             # Run pytest with coverage
             result = subprocess.run([
-                'python', '-m', 'pytest',
+                'python3', '-m', 'pytest',
                 'tests/unit/',
                 '-v',
                 '--tb=short',
@@ -167,7 +174,7 @@ class QualityGatesOrchestrator:
         """Run integration tests"""
         try:
             result = subprocess.run([
-                'python', '-m', 'pytest',
+                'python3', '-m', 'pytest',
                 'tests/integration/',
                 '-v',
                 '--tb=short',
@@ -266,7 +273,7 @@ class QualityGatesOrchestrator:
             else:
                 quality_checks.append(('ruff', 0, True))
 
-        except Exception:
+        except Exception as e:
             logger.error(f"Error in operation: {e}")
             quality_checks.append(('ruff', 999, False))
 
@@ -278,7 +285,7 @@ class QualityGatesOrchestrator:
 
             quality_checks.append(('black', 0 if result.returncode == 0 else 1, result.returncode == 0))
 
-        except Exception:
+        except Exception as e:
             logger.error(f"Error in operation: {e}")
             quality_checks.append(('black', 1, False))
 
@@ -360,7 +367,7 @@ class QualityGatesOrchestrator:
                         duration=0
                     )
 
-                except json.JSONDecodeError:
+                except json.JSONDecodeError as e:
                     logger.error(f"Error in operation: {e}")
                     # If bandit output isn't JSON, assume no major issues
                     return QualityGateResult(
@@ -380,7 +387,7 @@ class QualityGatesOrchestrator:
                     duration=0
                 )
 
-        except FileNotFoundError:
+        except FileNotFoundError as e:
             logger.error(f"Error in operation: {e}")
             # Bandit not installed
             return QualityGateResult(
@@ -406,7 +413,7 @@ class QualityGatesOrchestrator:
         try:
             # Run basic performance tests
             result = subprocess.run([
-                'python', '-m', 'pytest',
+                'python3', '-m', 'pytest',
                 'tests/performance/',
                 '-v',
                 '--tb=short',
@@ -620,7 +627,7 @@ class QualityGatesOrchestrator:
         try:
             # Run light load tests only
             result = subprocess.run([
-                'python', '-m', 'pytest',
+                'python3', '-m', 'pytest',
                 'tests/performance/test_load_testing.py::TestLoadAndStress::test_light_load',
                 '-v',
                 '--tb=short',

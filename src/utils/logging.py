@@ -268,7 +268,6 @@ class SecurityLogger:
 
     def authentication_attempt(self, user_id: str, success: bool,
                             ip_address: str, user_agent: str = None):
-        """Authentication Attempt."""
         """Log authentication attempt"""
         self.logger.info(
             f"Authentication {'successful' if success else 'failed'}",
@@ -280,7 +279,6 @@ class SecurityLogger:
         )
 
     def access_attempt(self, user_id: str, resource: str, action: str,
-        """Access Attempt."""
                         success: bool, reason: str = None):
         """Log access attempt"""
         self.logger.info(
@@ -294,7 +292,6 @@ class SecurityLogger:
         )
 
     def suspicious_activity(self, description: str, user_id: str = None,
-        """Suspicious Activity."""
                             ip_address: str = None, **details):
         """Log suspicious activity"""
         self.logger.warning(
@@ -306,7 +303,6 @@ class SecurityLogger:
         )
 
     def security_violation(self, violation_type: str, description: str,
-        """Security Violation."""
                             severity: str = "medium", **details):
         """Log security violation"""
         log_method = self.logger.critical if severity == "high" else self.logger.error
@@ -326,7 +322,6 @@ class AuditLogger:
         self.logger = get_logger("audit")
 
     def data_access(self, user_id: str, data_type: str, operation: str,
-        """Data Access."""
                     record_count: int = None, **metadata):
         """Log data access"""
         self.logger.info(
@@ -340,7 +335,6 @@ class AuditLogger:
         )
 
     def model_training(self, user_id: str, model_name: str,
-        """Model Training."""
                         dataset_info: Dict[str, Any], **parameters):
         """Log model training"""
         self.logger.info(
@@ -353,7 +347,6 @@ class AuditLogger:
         )
 
     def encryption_operation(self, user_id: str, operation: str,
-        """Encryption Operation."""
                             data_size: int, context_name: str):
         """Log encryption operations"""
         self.logger.info(
@@ -367,14 +360,30 @@ class AuditLogger:
 
 # Global loggers
 _loggers = {}
-security_logger = SecurityLogger()
-audit_logger = AuditLogger()
 
 def get_logger(name: str) -> HEGraphLogger:
     """Get or create logger instance"""
     if name not in _loggers:
         _loggers[name] = HEGraphLogger(name)
     return _loggers[name]
+
+def get_security_logger():
+    """Get security logger instance"""
+    global security_logger
+    if security_logger is None:
+        security_logger = SecurityLogger()
+    return security_logger
+
+def get_audit_logger():
+    """Get audit logger instance"""
+    global audit_logger
+    if audit_logger is None:
+        audit_logger = AuditLogger()
+    return audit_logger
+
+# Initialize global loggers lazily
+security_logger = None
+audit_logger = None
 
 def setup_logging(log_level: str = "INFO", log_dir: str = "logs"):
     """Setup global logging configuration"""

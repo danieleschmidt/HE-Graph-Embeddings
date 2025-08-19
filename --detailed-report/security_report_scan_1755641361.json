@@ -1,0 +1,15 @@
+{
+  "scan_id": "scan_1755641361",
+  "timestamp": "2025-08-19T22:09:21.825187",
+  "findings": [],
+  "summary": {
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "info": 0,
+    "total": 0
+  },
+  "scan_duration": 0.001481,
+  "scanned_files": 0
+}

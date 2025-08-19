@@ -411,7 +411,6 @@ class EncryptionCache:
 
     def cache_encrypted_tensor(self, key: str, encrypted_tensor: Any,
                                 context_name: str = "default") -> bool:
-        """Cache Encrypted Tensor."""
         """Cache encrypted tensor with context reference"""
         cache_key = f"{context_name}_{key}"
         return self.cache.put(cache_key, encrypted_tensor)
@@ -458,7 +457,6 @@ encryption_cache = EncryptionCache()
 computation_cache = ComputationCache(MemoryAwareCache())
 
 def cached(cache: MemoryAwareCache = None, ttl: Optional[float] = None,
-    """Cached."""
             key_func: Optional[Callable] = None):
     """Decorator for caching function results"""
     cache = cache or MemoryAwareCache()

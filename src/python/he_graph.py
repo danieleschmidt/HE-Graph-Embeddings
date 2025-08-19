@@ -221,7 +221,6 @@ class CKKSContext:
 
     def _relinearize(self, c0: torch.Tensor, c1: torch.Tensor,
                     c2: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
-        """ Relinearize."""
         """Relinearization to reduce ciphertext size"""
         if self._relin_keys is None:
             raise RuntimeError("Relinearization keys not generated")
@@ -278,8 +277,8 @@ class EncryptedTensor:
     """Encrypted tensor for homomorphic operations"""
 
     def __init__(self, c0: torch.Tensor, c1: torch.Tensor,
-        """  Init  ."""
                 scale: float, context: CKKSContext):
+        """Initialize EncryptedTensor"""
         self.c0 = c0
         self.c1 = c1
         self.scale = scale
@@ -323,8 +322,8 @@ class HELinear(HEModule):
     """Encrypted linear layer"""
 
     def __init__(self, in_features: int, out_features: int,
-        """  Init  ."""
                 context: CKKSContext, bias: bool = True):
+        """Initialize HELinear layer"""
         super().__init__(context)
         self.in_features = in_features
         self.out_features = out_features
@@ -357,10 +356,10 @@ class HEGraphSAGE(HEModule):
     """Encrypted GraphSAGE model"""
 
     def __init__(self, in_channels: int, hidden_channels: Union[int, List[int]],
-        """  Init  ."""
                 out_channels: int = None, num_layers: int = None,
                 aggregator: str = 'mean', activation: str = 'relu_poly',
                 dropout_enc: float = 0.0, context: CKKSContext = None):
+        """Initialize encrypted GCN"""
         super().__init__(context or CKKSContext())
 
         if isinstance(hidden_channels, int):
@@ -386,8 +385,7 @@ class HEGraphSAGE(HEModule):
                 in_dim, out_channels, aggregator, context
             ))
 
-    def forward(self, x_enc: EncryptedTensor) -> None:,
-        """Forward."""
+    def forward(self, x_enc: EncryptedTensor,
                 edge_index: torch.Tensor) -> EncryptedTensor:
         """Forward pass with encrypted features"""
         for i, conv in enumerate(self.convs):
@@ -433,8 +431,8 @@ class GraphSAGEConv(HEModule):
     """GraphSAGE convolution layer"""
 
     def __init__(self, in_channels: int, out_channels: int,
-        """  Init  ."""
                 aggregator: str, context: CKKSContext):
+        """Initialize HESAGEConv"""
         super().__init__(context)
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -444,8 +442,7 @@ class GraphSAGEConv(HEModule):
         self.lin_self = HELinear(in_channels, out_channels, context)
         self.lin_neigh = HELinear(in_channels, out_channels, context)
 
-    def forward(self, x_enc: EncryptedTensor) -> None:,
-        """Forward."""
+    def forward(self, x_enc: EncryptedTensor,
                 edge_index: torch.Tensor) -> EncryptedTensor:
         """GraphSAGE forward pass"""
         # Aggregate neighbor features
@@ -460,8 +457,7 @@ class GraphSAGEConv(HEModule):
 
         return output
 
-    def _aggregate(self, x_enc: EncryptedTensor) -> None:,
-        """ Aggregate."""
+    def _aggregate(self, x_enc: EncryptedTensor,
                     edge_index: torch.Tensor) -> EncryptedTensor:
         """Aggregate neighbor features"""
         row, col = edge_index
@@ -517,9 +513,9 @@ class HEGAT(HEModule):
     """Encrypted Graph Attention Network"""
 
     def __init__(self, in_channels: int, out_channels: int, heads: int = 1,
-        """  Init  ."""
                 attention_type: str = 'additive', edge_dim: int = None,
                 context: CKKSContext = None):
+        """Initialize HEGATConv"""
         super().__init__(context or CKKSContext())
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -543,8 +539,7 @@ class HEGAT(HEModule):
         self.softmax_order = 3
         self.softmax_range = (-5, 5)
 
-    def forward(self, x_enc: EncryptedTensor) -> None:, edge_index: torch.Tensor,
-        """Forward."""
+    def forward(self, x_enc: EncryptedTensor, edge_index: torch.Tensor,
                 edge_attr_enc: Optional[EncryptedTensor] = None) -> EncryptedTensor:
         """GAT forward pass with encrypted features"""
         # Linear transformations
@@ -571,8 +566,7 @@ class HEGAT(HEModule):
 
         return output_enc
 
-    def _compute_attention(self, q_enc: EncryptedTensor) -> None:, k_enc: EncryptedTensor,
-        """ Compute Attention."""
+    def _compute_attention(self, q_enc: EncryptedTensor, k_enc: EncryptedTensor,
                             edge_index: torch.Tensor) -> EncryptedTensor:
         """Compute attention scores"""
         if self.attention_type == 'additive':
@@ -602,16 +596,14 @@ class HEGAT(HEModule):
 
         return result
 
-    def _apply_attention(self, attn_weights_enc: EncryptedTensor) -> None:,
-        """ Apply Attention."""
+    def _apply_attention(self, attn_weights_enc: EncryptedTensor,
                         v_enc: EncryptedTensor,
                         edge_index: torch.Tensor) -> EncryptedTensor:
         """Apply attention weights to values"""
         # Simplified - actual implementation needs message passing
         return attn_weights_enc * v_enc
 
-    def set_softmax_approximation(self, method: str = 'taylor') -> None:,
-        """Set Softmax Approximation."""
+    def set_softmax_approximation(self, method: str = 'taylor',
                                     order: int = 3,
                                     range: Tuple[float, float] = (-5, 5)):
         """Configure softmax approximation method"""
@@ -639,9 +631,9 @@ class SecurityEstimator:
 
     @staticmethod
     def recommend(security_bits: int = 128,
-        """Recommend."""
                     multiplicative_depth: int = 10,
                     precision_bits: int = 30) -> HEConfig:
+        """Recommend HE configuration"""
         """Recommend parameters for target security level"""
         if security_bits == 128:
             if multiplicative_depth <= 5:
@@ -675,7 +667,7 @@ class NoiseTracker:
         """  Exit  ."""
         pass
 
-    def update(self, ciphertext: EncryptedTensor) -> None:):
+    def update(self, ciphertext: EncryptedTensor) -> None:
         """Update noise estimate"""
         self.current_noise = ciphertext.noise_budget
         self.noise_history.append(self.current_noise)
@@ -686,7 +678,6 @@ class NoiseTracker:
 
 # Utility functions
 def scatter_add_encrypted(src_enc: EncryptedTensor, index: torch.Tensor,
-    """Scatter Add Encrypted."""
                         dim_size: int) -> EncryptedTensor:
     """Encrypted scatter add operation"""
     # Simplified - actual implementation needs proper scatter
@@ -702,7 +693,6 @@ def zeros_encrypted_like(x_enc: EncryptedTensor) -> EncryptedTensor:
     return x_enc.context.encrypt(zeros)
 
 def nll_loss_encrypted(output_enc: EncryptedTensor,
-    """Nll Loss Encrypted."""
                         target_enc: EncryptedTensor) -> EncryptedTensor:
     """Encrypted negative log-likelihood loss"""
     # Simplified - needs polynomial approximation of log

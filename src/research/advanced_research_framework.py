@@ -75,12 +75,15 @@ except ImportError:
     class AlgorithmType:
         """AlgorithmType class."""
         pass
-    class QuantumTaskScheduler: pass
+    class QuantumTaskScheduler:
         """QuantumTaskScheduler class."""
-    class QuantumResourceManager: pass
+        pass
+    class QuantumResourceManager:
         """QuantumResourceManager class."""
-    class ValidationError(Exception): pass
+        pass
+    class ValidationError(Exception):
         """ValidationError class."""
+        pass
 
 logger = logging.getLogger(__name__)
 
@@ -196,7 +199,6 @@ class AdvancedResearchFramework:
     """
 
     def __init__(self, research_directory: str = "./research_output",
-        """  Init  ."""
                 enable_parallel_execution: bool = True,
                 max_concurrent_experiments: int = 4):
         """
@@ -919,8 +921,7 @@ class AdvancedResearchFramework:
             'sample_size': len(results)
         }
 
-    def _calculate_comparative_metrics(self, treatment: Dict[str) -> None:, Any],
-        """ Calculate Comparative Metrics."""
+    def _calculate_comparative_metrics(self, treatment: Dict[str, Any],
                                     control: Dict[str, Any]) -> Dict[str, Any]:
         """Calculate comparative metrics between treatment and control"""
         comparisons = {}

@@ -104,7 +104,6 @@ class GraphDataValidator:
     def validate_graph_structure(node_features: List[List[float]],
                                 edge_index: List[List[int]],
                                 edge_attributes: Optional[List[List[float]]] = None) -> Tuple[bool, Optional[str]]:
-        """Validate Graph Structure."""
         """Validate complete graph structure"""
         # Validate node features
         valid, error = GraphDataValidator.validate_node_features(node_features)
