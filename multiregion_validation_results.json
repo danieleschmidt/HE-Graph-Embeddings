@@ -1,0 +1,94 @@
+{
+  "overall_status": "FAIL",
+  "total_errors": 2,
+  "total_warnings": 4,
+  "detailed_results": {
+    "terraform_configs": {
+      "status": "FAIL",
+      "errors": [
+        "kubernetes.tf: Missing components: ['terraform {', 'provider \"aws\"', 'variable ']"
+      ],
+      "warnings": [],
+      "validated_files": [
+        "/root/repo/deployment/terraform/main.tf",
+        "/root/repo/deployment/quantum-planner/terraform/global-deployment.tf"
+      ]
+    },
+    "region_configurations": {
+      "status": "PASS",
+      "errors": [],
+      "warnings": [
+        "Region us-west-2 not found in configuration"
+      ],
+      "regions_validated": [
+        "us-east-1",
+        "eu-west-1",
+        "ap-northeast-1"
+      ]
+    },
+    "compliance_frameworks": {
+      "status": "PASS",
+      "errors": [],
+      "warnings": [],
+      "frameworks_validated": [
+        "GDPR",
+        "CCPA",
+        "HIPAA",
+        "SOC2"
+      ]
+    },
+    "kubernetes_configs": {
+      "status": "FAIL",
+      "errors": [
+        "Missing Kubernetes component: aws_security_group"
+      ],
+      "warnings": [],
+      "validated_components": [
+        "aws_eks_cluster",
+        "aws_eks_node_group",
+        "aws_iam_role",
+        "encryption_config"
+      ]
+    },
+    "security_configurations": {
+      "status": "PASS",
+      "errors": [],
+      "warnings": [
+        "Security feature not found: ssl_certificate",
+        "Security feature not found: private_subnet"
+      ],
+      "security_features": [
+        "kms",
+        "encryption",
+        "security_group",
+        "vpc"
+      ]
+    },
+    "monitoring_setup": {
+      "status": "PASS",
+      "errors": [],
+      "warnings": [
+        "Monitoring component not found: cloudwatch"
+      ],
+      "monitoring_components": [
+        "prometheus",
+        "grafana",
+        "health_check",
+        "metrics",
+        "logging"
+      ]
+    },
+    "docker_production": {
+      "status": "PASS",
+      "errors": [],
+      "warnings": [],
+      "validated_features": [
+        "multi-stage",
+        "non-root user",
+        "HEALTHCHECK",
+        "CUDA",
+        "security hardening"
+      ]
+    }
+  }
+}

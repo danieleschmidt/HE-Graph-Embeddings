@@ -73,7 +73,6 @@ class GraphPackerBase(ABC):
     @abstractmethod
     def pack_nodes(self, node_features: torch.Tensor,
                     edge_index: torch.Tensor) -> Tuple[List[torch.Tensor], Dict[str, Any]]:
-        """Pack Nodes."""
         """Pack node features into ciphertext-ready tensors"""
         pass
 
@@ -125,8 +124,7 @@ class SpatialLocalityPacker(GraphPackerBase):
         super().__init__(config)
         self.bfs_cache = {}
 
-    def pack_nodes(self, node_features: torch.Tensor) -> None:,
-        """Pack Nodes."""
+    def pack_nodes(self, node_features: torch.Tensor,
                     edge_index: torch.Tensor) -> Tuple[List[torch.Tensor], Dict[str, Any]]:
         """Pack nodes using spatial locality (BFS ordering)"""
         num_nodes = node_features.size(0)
@@ -150,8 +148,7 @@ class SpatialLocalityPacker(GraphPackerBase):
 
         return packed_tensors, packing_info
 
-    def unpack_nodes(self, packed_tensors: List[torch.Tensor]) -> None:,
-        """Unpack Nodes."""
+    def unpack_nodes(self, packed_tensors: List[torch.Tensor],
                     packing_info: Dict[str, Any]) -> torch.Tensor:
         """Unpack spatial locality packed tensors"""
         return self._unpack_by_mapping(packed_tensors, packing_info)
@@ -197,8 +194,7 @@ class SpatialLocalityPacker(GraphPackerBase):
 
         return ordering
 
-    def _pack_by_order(self, node_features: torch.Tensor) -> None:,
-        """ Pack By Order."""
+    def _pack_by_order(self, node_features: torch.Tensor,
                         ordering: List[int], feature_dim: int) -> Tuple[List[torch.Tensor], Dict[str, Any]]:
         """Pack nodes into ciphertexts following the given ordering"""
         packed_tensors = []
@@ -236,8 +232,7 @@ class SpatialLocalityPacker(GraphPackerBase):
 
         return packed_tensors, packing_info
 
-    def _create_pack_tensor(self, node_features: torch.Tensor) -> None:,
-        """ Create Pack Tensor."""
+    def _create_pack_tensor(self, node_features: torch.Tensor,
                             pack_nodes: List[int], feature_dim: int) -> torch.Tensor:
         """Create a packed tensor for a group of nodes"""
         pack_size = len(pack_nodes)
@@ -256,8 +251,7 @@ class SpatialLocalityPacker(GraphPackerBase):
 
         return packed_tensor
 
-    def _unpack_by_mapping(self, packed_tensors: List[torch.Tensor]) -> None:,
-        """ Unpack By Mapping."""
+    def _unpack_by_mapping(self, packed_tensors: List[torch.Tensor],
                             packing_info: Dict[str, Any]) -> torch.Tensor:
         """Unpack tensors using packing mapping"""
         pack_assignments = packing_info['pack_assignments']
@@ -281,8 +275,7 @@ class SpatialLocalityPacker(GraphPackerBase):
 
         return unpacked_features
 
-    def _compute_spatial_locality_score(self, edge_index: torch.Tensor) -> None:,
-        """ Compute Spatial Locality Score."""
+    def _compute_spatial_locality_score(self, edge_index: torch.Tensor,
                                         node_to_pack: Dict[int, int]) -> float:
         """Compute spatial locality preservation score"""
         same_pack_edges = 0
@@ -303,8 +296,7 @@ class CommunityAwarePacker(GraphPackerBase):
         super().__init__(config)
         self.community_cache = {}
 
-    def pack_nodes(self, node_features: torch.Tensor) -> None:,
-        """Pack Nodes."""
+    def pack_nodes(self, node_features: torch.Tensor,
                     edge_index: torch.Tensor) -> Tuple[List[torch.Tensor], Dict[str, Any]]:
         """Pack nodes using community detection"""
         num_nodes = node_features.size(0)
@@ -324,8 +316,7 @@ class CommunityAwarePacker(GraphPackerBase):
 
         return packed_tensors, packing_info
 
-    def unpack_nodes(self, packed_tensors: List[torch.Tensor]) -> None:,
-        """Unpack Nodes."""
+    def unpack_nodes(self, packed_tensors: List[torch.Tensor],
                     packing_info: Dict[str, Any]) -> torch.Tensor:
         """Unpack community-aware packed tensors"""
         return self._unpack_by_mapping(packed_tensors, packing_info)
@@ -387,8 +378,7 @@ class CommunityAwarePacker(GraphPackerBase):
 
         return communities
 
-    def _pack_by_communities(self, node_features: torch.Tensor) -> None:,
-        """ Pack By Communities."""
+    def _pack_by_communities(self, node_features: torch.Tensor,
                             communities: List[List[int]]) -> Tuple[List[torch.Tensor], Dict[str, Any]]:
         """Pack nodes by communities"""
         packed_tensors = []
@@ -422,8 +412,7 @@ class CommunityAwarePacker(GraphPackerBase):
 
         return packed_tensors, packing_info
 
-    def _create_pack_tensor(self, node_features: torch.Tensor) -> None:,
-        """ Create Pack Tensor."""
+    def _create_pack_tensor(self, node_features: torch.Tensor,
                             pack_nodes: List[int], feature_dim: int) -> torch.Tensor:
         """Create a packed tensor for a group of nodes"""
         packed_tensor = torch.zeros(self.config.slots_per_ciphertext,
@@ -438,8 +427,7 @@ class CommunityAwarePacker(GraphPackerBase):
 
         return packed_tensor
 
-    def _unpack_by_mapping(self, packed_tensors: List[torch.Tensor]) -> None:,
-        """ Unpack By Mapping."""
+    def _unpack_by_mapping(self, packed_tensors: List[torch.Tensor],
                             packing_info: Dict[str, Any]) -> torch.Tensor:
         """Unpack tensors using packing mapping"""
         pack_assignments = packing_info['pack_assignments']
@@ -472,8 +460,7 @@ class CommunityAwarePacker(GraphPackerBase):
 
         return unpacked_features
 
-    def _compute_community_coherence(self, communities: List[List[int]]) -> None:,
-        """ Compute Community Coherence."""
+    def _compute_community_coherence(self, communities: List[List[int]],
                                     pack_assignments: Dict[int, List[int]]) -> float:
         """Compute how well communities align with packs"""
         total_coherence = 0.0
@@ -511,8 +498,7 @@ class AdaptiveGraphPacker(GraphPackerBase):
         self.spatial_packer = SpatialLocalityPacker(config)
         self.community_packer = CommunityAwarePacker(config)
 
-    def pack_nodes(self, node_features: torch.Tensor) -> None:,
-        """Pack Nodes."""
+    def pack_nodes(self, node_features: torch.Tensor,
                     edge_index: torch.Tensor) -> Tuple[List[torch.Tensor], Dict[str, Any]]:
         """Adaptively select and apply optimal packing strategy"""
         num_nodes = node_features.size(0)
@@ -554,8 +540,7 @@ class AdaptiveGraphPacker(GraphPackerBase):
 
         return packed_tensors, packing_info
 
-    def unpack_nodes(self, packed_tensors: List[torch.Tensor]) -> None:,
-        """Unpack Nodes."""
+    def unpack_nodes(self, packed_tensors: List[torch.Tensor],
                     packing_info: Dict[str, Any]) -> torch.Tensor:
         """Unpack using the strategy that was used for packing"""
         strategy = packing_info.get('adaptive_strategy', 'spatial_locality')
@@ -585,8 +570,7 @@ class GraphAwarePackingManager:
         else:
             raise ValueError(f"Unsupported packing strategy: {self.config.strategy}")
 
-    def pack_graph(self, node_features: torch.Tensor) -> None:,
-        """Pack Graph."""
+    def pack_graph(self, node_features: torch.Tensor,
                     edge_index: torch.Tensor) -> Tuple[List[torch.Tensor], Dict[str, Any]]:
         """Pack graph for homomorphic encryption"""
         logger.info(f"Packing graph with {node_features.size(0)} nodes using {self.config.strategy.value}")
@@ -612,8 +596,7 @@ class GraphAwarePackingManager:
 
         return packed_tensors, packing_info
 
-    def unpack_graph(self, packed_tensors: List[torch.Tensor]) -> None:,
-        """Unpack Graph."""
+    def unpack_graph(self, packed_tensors: List[torch.Tensor],
                     packing_info: Dict[str, Any]) -> torch.Tensor:
         """Unpack graph from homomorphic encryption"""
         return self.packer.unpack_nodes(packed_tensors, packing_info)
@@ -636,7 +619,6 @@ class GraphAwarePackingManager:
 
 # Research utility functions
 def benchmark_packing_strategies(node_features: torch.Tensor, edge_index: torch.Tensor,
-    """Benchmark Packing Strategies."""
                                 strategies: List[PackingStrategy] = None) -> Dict[str, PackingMetrics]:
     """Benchmark different packing strategies on the same graph"""
     if strategies is None:
@@ -662,7 +644,6 @@ def benchmark_packing_strategies(node_features: torch.Tensor, edge_index: torch.
     return results
 
 def estimate_encryption_overhead_reduction(metrics: PackingMetrics,
-    """Estimate Encryption Overhead Reduction."""
                                             baseline_overhead: float = 80.0) -> float:
     """Estimate actual HE overhead reduction from packing metrics"""
     # Model the relationship between cross-ciphertext operations and HE overhead

@@ -315,7 +315,6 @@ class ComplianceManager:
 
     def register_data_subject(self, subject_id: str, region: str, frameworks: List[ComplianceFramework],
                             data_categories: Set[DataCategory], is_minor: bool = False) -> DataSubject:
-        """Register Data Subject."""
         """Register a data subject for compliance tracking"""
 
         data_subject = DataSubject(
@@ -491,8 +490,7 @@ class ComplianceManager:
 
         return consent_record and consent_record.get("status") == "active"
 
-    def record_consent(self, subject_id: str) -> None:, purpose: ProcessingPurpose, consent_type: ConsentType,
-        """Record Consent."""
+    def record_consent(self, subject_id: str, purpose: ProcessingPurpose, consent_type: ConsentType,
                         granted_by: str, metadata: Dict[str, Any] = None) -> str:
         """Record consent for data processing"""
 
@@ -529,8 +527,7 @@ class ComplianceManager:
 
         return consent_id
 
-    def withdraw_consent(self, subject_id: str) -> None:, purpose: ProcessingPurpose,
-        """Withdraw Consent."""
+    def withdraw_consent(self, subject_id: str, purpose: ProcessingPurpose,
                         withdrawal_method: str = "user_request") -> bool:
         """Withdraw consent for data processing"""
 
@@ -558,8 +555,7 @@ class ComplianceManager:
 
         return True
 
-    def record_processing(self, subject_id: str) -> None:, purpose: ProcessingPurpose,
-        """Record Processing."""
+    def record_processing(self, subject_id: str, purpose: ProcessingPurpose,
                         data_categories: List[DataCategory], legal_basis: str,
                         processing_duration_ms: Optional[int] = None) -> str:
         """Record a data processing activity"""
