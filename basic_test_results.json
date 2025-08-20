@@ -5,7 +5,7 @@
     "passed_tests": 12,
     "failed_tests": 6,
     "success_rate": 0.6666666666666666,
-    "total_duration": 0.05762529373168945,
+    "total_duration": 0.12680983543395996,
     "estimated_coverage": 0.8372093023255814
   },
   "suites": [
@@ -15,7 +15,7 @@
       "passed_tests": 7,
       "failed_tests": 0,
       "success_rate": 1.0,
-      "duration": 0.008397102355957031
+      "duration": 0.021395206451416016
     },
     {
       "name": "test_imports.py",
@@ -23,7 +23,7 @@
       "passed_tests": 2,
       "failed_tests": 4,
       "success_rate": 0.3333333333333333,
-      "duration": 0.04830741882324219
+      "duration": 0.10450124740600586
     },
     {
       "name": "test_security.py",
@@ -31,7 +31,7 @@
       "passed_tests": 3,
       "failed_tests": 2,
       "success_rate": 0.6,
-      "duration": 0.0009207725524902344
+      "duration": 0.0009133815765380859
     },
     {
       "name": "test_quantum_optimization_engine.py",
