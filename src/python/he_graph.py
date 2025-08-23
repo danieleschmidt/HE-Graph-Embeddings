@@ -3,15 +3,16 @@ HE-Graph-Embeddings: Privacy-preserving graph neural networks using homomorphic 
 """
 
 
+from typing import List, Tuple, Optional, Union, Dict, Any
+from dataclasses import dataclass
+from enum import Enum
+import logging
+import warnings
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from typing import List, Tuple, Optional, Union, Dict, Any
-import numpy as np
-from dataclasses import dataclass
-import warnings
-import logging
-from enum import Enum
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -286,19 +287,19 @@ class EncryptedTensor:
         self.level = len(context.config.coeff_modulus_bits) - 1
 
     def __add__(self, other: 'EncryptedTensor') -> 'EncryptedTensor':
-        """  Add  ."""
+        """Add encrypted tensors using homomorphic addition."""
         return self.context.add(self, other)
 
     def __mul__(self, other: 'EncryptedTensor') -> 'EncryptedTensor':
-        """  Mul  ."""
+        """Multiply encrypted tensors using homomorphic multiplication."""
         return self.context.multiply(self, other)
 
     def rotate(self, steps: int) -> 'EncryptedTensor':
-        """Rotate."""
+        """Rotate encrypted vector by specified number of positions."""
         return self.context.rotate(self, steps)
 
     def rescale(self) -> 'EncryptedTensor':
-        """Rescale."""
+        """Rescale encrypted tensor to manage noise growth."""
         return self.context.rescale(self)
 
     @property
@@ -655,16 +656,16 @@ class NoiseTracker:
     """Track noise budget during computation"""
 
     def __init__(self):
-        """  Init  ."""
+        """Initialize noise tracker for monitoring computation budget."""
         self.noise_history = []
         self.current_noise = 0
 
     def __enter__(self):
-        """  Enter  ."""
+        """Enter noise tracking context."""
         return self
 
     def __exit__(self, *args):
-        """  Exit  ."""
+        """Exit noise tracking context."""
         pass
 
     def update(self, ciphertext: EncryptedTensor) -> None:
@@ -702,7 +703,7 @@ class HESGD:
     """Encrypted SGD optimizer"""
 
     def __init__(self, params, lr: float = 0.01):
-        """  Init  ."""
+        """Initialize encrypted SGD optimizer with parameters and learning rate."""
         self.params = list(params)
         self.lr = lr
 

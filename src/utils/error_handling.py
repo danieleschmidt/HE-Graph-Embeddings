@@ -25,7 +25,7 @@ class HEGraphError(Exception):
     """Base exception for HE-Graph-Embeddings"""
     def __init__(self, message: str, error_code: str = None,
                 details: Dict[str, Any] = None, severity: ErrorSeverity = ErrorSeverity.MEDIUM):
-        """  Init  ."""
+        """Initialize HEGraphError with message, code, details, and severity."""
         super().__init__(message)
         self.message = message
         self.error_code = error_code or self.__class__.__name__
@@ -59,13 +59,13 @@ class ValidationError(HEGraphError):
 class SecurityError(HEGraphError):
     """Security-related errors"""
     def __init__(self, message: str, **kwargs):
-        """  Init  ."""
+        """Initialize SecurityError with high severity by default."""
         super().__init__(message, severity=ErrorSeverity.HIGH, **kwargs)
 
 class MemoryError(HEGraphError):
     """Memory allocation and management errors"""
     def __init__(self, message: str, **kwargs):
-        """  Init  ."""
+        """Initialize MemoryError with critical severity by default."""
         super().__init__(message, severity=ErrorSeverity.CRITICAL, **kwargs)
 
 class CUDAError(HEGraphError):
@@ -89,10 +89,10 @@ def retry_on_error(
     """Decorator to retry function calls on specified exceptions"""
 
     def decorator(func: Callable) -> Callable:
-        """Decorator."""
+        """Create retry decorator for the specified function."""
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            """Wrapper."""
+            """Execute function with retry logic on exceptions."""
             last_exception = None
 
             for attempt in range(max_retries + 1):
@@ -124,9 +124,10 @@ def async_retry_on_error(
     """Async version of retry decorator"""
 
     def decorator(func: Callable) -> Callable:
-        """Decorator."""
+        """Create async retry decorator for the specified function."""
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
+            """Execute async function with retry logic on exceptions."""
             last_exception = None
 
             for attempt in range(max_retries + 1):
@@ -157,10 +158,10 @@ def handle_exceptions(
     """Decorator to handle exceptions with configurable behavior"""
 
     def decorator(func: Callable) -> Callable:
-        """Decorator."""
+        """Create exception handling decorator for the specified function."""
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            """Wrapper."""
+            """Execute function with comprehensive exception handling."""
             try:
                 return func(*args, **kwargs)
             except Exception as e:
@@ -191,8 +192,8 @@ class ErrorRecovery:
                 kwargs['batch_size'] = max(1, int(original_batch_size * reduction_factor))
                 logger.info(f"Retrying with reduced batch size: {kwargs['batch_size']}")
                 return func(*args, **kwargs)
-            except MemoryError:
-                logger.error(f"Error in operation: {e}")
+            except MemoryError as e:
+                logger.error(f"Memory error in operation: {e}")
                 continue
 
         raise MemoryError("Unable to recover from memory error even with minimum batch size")
@@ -218,7 +219,7 @@ class ErrorRecovery:
             try:
                 return func(*args, **kwargs)
             except NetworkError as e:
-                logger.error(f"Error in operation: {e}")
+                logger.error(f"Network error in operation: {e}")
                 if attempt == max_retries - 1:
                     raise
 
@@ -230,7 +231,7 @@ class CircuitBreaker:
     """Circuit breaker pattern for handling recurring failures"""
 
     def __init__(self, failure_threshold: int = 5, recovery_timeout: float = 60.0):
-        """  Init  ."""
+        """Initialize circuit breaker with failure threshold and recovery timeout."""
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
         self.failure_count = 0
@@ -250,7 +251,7 @@ class CircuitBreaker:
             self._on_success()
             return result
         except Exception as e:
-            logger.error(f"Error in operation: {e}")
+            logger.error(f"Circuit breaker error in operation: {e}")
             self._on_failure()
             raise
 
@@ -272,7 +273,7 @@ class ErrorMetrics:
     """Track error metrics for monitoring"""
 
     def __init__(self):
-        """  Init  ."""
+        """Initialize error metrics tracking system."""
         self.error_counts = {}
         self.error_rates = {}
         self.last_error_time = {}
@@ -318,19 +319,19 @@ class ErrorHandler:
     """Context manager for comprehensive error handling"""
 
     def __init__(self, operation_name: str, critical: bool = False):
-        """  Init  ."""
+        """Initialize error handler context for operation tracking."""
         self.operation_name = operation_name
         self.critical = critical
         self.start_time = None
 
     def __enter__(self):
-        """  Enter  ."""
+        """Enter error handling context and start operation timing."""
         self.start_time = time.time()
         logger.info(f"Starting operation: {self.operation_name}")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """  Exit  ."""
+        """Exit error handling context and log operation results."""
         duration = time.time() - self.start_time
 
         if exc_type is None:
@@ -373,7 +374,7 @@ def gpu_fallback(func: Callable) -> Callable:
     """Decorator to fallback to CPU on GPU errors"""
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        """Wrapper."""
+        """Execute function with GPU fallback on CUDA errors."""
         try:
             return func(*args, **kwargs)
         except (CUDAError, RuntimeError) as e:

@@ -3,11 +3,12 @@ Comprehensive input validation utilities for HE-Graph-Embeddings
 """
 
 
-import torch
-import numpy as np
 from typing import Any, Dict, List, Optional, Union, Tuple
 from dataclasses import dataclass
 import warnings
+
+import numpy as np
+import torch
 
 from .error_handling import ValidationError, SecurityError
 from .logging import get_logger
