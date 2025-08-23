@@ -1,8 +1,8 @@
 {
-  "timestamp": "2025-08-19T22:09:51.814043",
-  "overall_score": 0.8698868657941293,
+  "timestamp": "2025-08-23T18:26:46.423619",
+  "overall_score": 0.8696216421240406,
   "passed": true,
-  "execution_time": 0.7324259281158447,
+  "execution_time": 1.101583480834961,
   "metrics": {
     "code_quality": {
       "score": 0.6853491753000556,
@@ -30,12 +30,12 @@
       "recommendations": []
     },
     "performance": {
-      "score": 0.8256386861313869,
+      "score": 0.8240473441108545,
       "details": {
         "algorithmic_complexity": 0.85,
         "memory_efficiency": 0.8,
         "io_efficiency": 0.9,
-        "concurrency_score": 0.7525547445255474
+        "concurrency_score": 0.746189376443418
       },
       "issues": [],
       "recommendations": []

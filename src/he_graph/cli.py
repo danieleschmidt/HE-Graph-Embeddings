@@ -6,12 +6,12 @@ Provides easy access to homomorphic graph neural network operations
 
 
 import argparse
-import sys
-import os
 import json
+import os
+import sys
 import time
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 # Import our HE graph library
 try:

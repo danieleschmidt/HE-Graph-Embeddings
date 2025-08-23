@@ -6,16 +6,17 @@ Performance optimization utilities and resource management
 import asyncio
 import concurrent.futures
 import multiprocessing as mp
+import queue
 import threading
 import time
-import torch
-import numpy as np
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-from dataclasses import dataclass
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
-from functools import wraps, lru_cache
-import queue
 import weakref
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+from dataclasses import dataclass
+from functools import wraps, lru_cache
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
+import numpy as np
+import torch
 
 from .logging import get_logger, PerformanceLogger
 from .caching import cached, tensor_cache

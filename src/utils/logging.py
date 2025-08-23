@@ -102,7 +102,7 @@ class HEGraphLogger:
     """Enhanced logger with correlation tracking and structured logging"""
 
     def __init__(self, name: str):
-        """  Init  ."""
+        """Initialize HEGraphLogger with structured logging capabilities."""
         self.logger = logging.getLogger(name)
         self.name = name
         self._setup_logger()
@@ -210,7 +210,7 @@ class PerformanceLogger:
     """Logger for performance metrics and profiling"""
 
     def __init__(self, operation_name: str):
-        """  Init  ."""
+        """Initialize PerformanceLogger for operation timing and metrics."""
         self.operation_name = operation_name
         self.start_time = None
         self.logger = get_logger(f"perf.{operation_name}")
@@ -250,12 +250,12 @@ class PerformanceLogger:
         )
 
     def __enter__(self):
-        """  Enter  ."""
+        """Enter performance logging context and start timing."""
         self.start()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """  Exit  ."""
+        """Exit performance logging context and record final metrics."""
         status = "failed" if exc_type else "success"
         self.stop(status=status)
 
@@ -263,7 +263,7 @@ class SecurityLogger:
     """Specialized logger for security events"""
 
     def __init__(self):
-        """  Init  ."""
+        """Initialize SecurityLogger for security event logging."""
         self.logger = get_logger("security")
 
     def authentication_attempt(self, user_id: str, success: bool,
@@ -318,7 +318,7 @@ class AuditLogger:
     """Logger for audit trails"""
 
     def __init__(self):
-        """  Init  ."""
+        """Initialize AuditLogger for compliance and audit trail logging."""
         self.logger = get_logger("audit")
 
     def data_access(self, user_id: str, data_type: str, operation: str,
