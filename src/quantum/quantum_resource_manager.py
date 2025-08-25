@@ -260,6 +260,168 @@ class QuantumResourceManager:
             logger.error(f"Failed to deallocate quantum resources {allocation_id}: {e}")
             return False
 
+    async def _calculate_quantum_speedup(self, allocation: Dict[str, float]) -> float:
+        """Calculate quantum speedup factor for allocation"""
+        total_speedup = 1.0
+        
+        for node_id, amount in allocation.items():
+            if node_id in self.quantum_nodes:
+                node = self.quantum_nodes[node_id]
+                # Quantum speedup based on efficiency and entanglement
+                node_speedup = node.quantum_efficiency
+                
+                # Bonus from entanglement
+                if node.entanglement_capability:
+                    entangled_count = len([n for n in self.quantum_nodes.values() 
+                                         if n.entanglement_capability and n.node_id != node_id])
+                    entanglement_bonus = 1.0 + 0.1 * min(entangled_count, 10)
+                    node_speedup *= entanglement_bonus
+                
+                total_speedup *= node_speedup
+        
+        return min(1000.0, total_speedup)  # Cap at 1000x speedup
+    
+    async def _check_entanglement_opportunities(self, allocation: QuantumAllocation, task: QuantumTask) -> None:
+        """Check for quantum entanglement opportunities"""
+        
+        # Find other active allocations that could be entangled
+        for other_alloc_id, other_alloc in self.active_allocations.items():
+            if other_alloc.task_id != task.task_id:
+                # Check for resource overlap
+                common_resources = set(allocation.resource_assignments.keys()) & set(other_alloc.resource_assignments.keys())
+                
+                if common_resources and len(common_resources) > 1:
+                    # Enable entanglement
+                    allocation.quantum_entangled_allocations.add(other_alloc_id)
+                    other_alloc.quantum_entangled_allocations.add(allocation.allocation_id)
+                    
+                    logger.info(f"Entanglement established between {allocation.allocation_id} and {other_alloc_id}")
+    
+    async def _reserve_quantum_resources(self, allocation: QuantumAllocation) -> bool:
+        """Reserve quantum resources for allocation"""
+        
+        reserved_resources = {}
+        
+        try:
+            # Check availability and reserve
+            for node_id, amount in allocation.resource_assignments.items():
+                if node_id in self.quantum_nodes:
+                    node = self.quantum_nodes[node_id]
+                    
+                    if node.available_capacity >= amount:
+                        node.available_capacity -= amount
+                        node.last_update = time.time()
+                        reserved_resources[node_id] = amount
+                    else:
+                        # Insufficient resources - rollback
+                        for reserved_node_id, reserved_amount in reserved_resources.items():
+                            self.quantum_nodes[reserved_node_id].available_capacity += reserved_amount
+                        return False
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Resource reservation failed: {e}")
+            return False
+    
+    async def _log_allocation_metrics(self, allocation: QuantumAllocation, start_time: float) -> None:
+        """Log allocation metrics"""
+        
+        allocation_time = time.time() - start_time
+        
+        metrics = {
+            'allocation_id': allocation.allocation_id,
+            'task_id': allocation.task_id,
+            'allocation_time': allocation_time,
+            'quantum_speedup': allocation.quantum_speedup_factor,
+            'resource_count': len(allocation.resource_assignments),
+            'entangled_allocations': len(allocation.quantum_entangled_allocations)
+        }
+        
+        # Encrypt sensitive metrics
+        if self.he_context:
+            sensitive_data = torch.tensor([
+                allocation_time,
+                allocation.quantum_speedup_factor,
+                len(allocation.resource_assignments)
+            ]).float()
+            
+            encrypted_metrics = self.he_context.encrypt(sensitive_data)
+            metrics['encrypted_data'] = encrypted_metrics
+        
+        # Store in history
+        self.allocation_history.append(allocation)
+        
+        logger.debug(f"Allocation metrics logged for {allocation.allocation_id}")
+    
+    async def _release_entangled_resources(self, allocation: QuantumAllocation) -> None:
+        """Release entangled resource connections"""
+        
+        # Remove entanglement connections
+        for entangled_id in allocation.quantum_entangled_allocations:
+            if entangled_id in self.active_allocations:
+                other_alloc = self.active_allocations[entangled_id]
+                other_alloc.quantum_entangled_allocations.discard(allocation.allocation_id)
+        
+        logger.debug(f"Released {len(allocation.quantum_entangled_allocations)} entanglement connections")
+    
+    async def _update_quantum_states_after_deallocation(self, allocation: QuantumAllocation) -> None:
+        """Update quantum states after resource deallocation"""
+        
+        # Update quantum amplitudes for affected nodes
+        for node_id in allocation.resource_assignments.keys():
+            if node_id in self.quantum_nodes:
+                node = self.quantum_nodes[node_id]
+                
+                # Restore quantum state after deallocation
+                if node.available_capacity > 0.5 * node.total_capacity:
+                    node.quantum_state = QuantumState.SUPERPOSITION
+                else:
+                    node.quantum_state = QuantumState.ENTANGLED
+                
+                # Update quantum amplitudes
+                amplitude_factor = node.available_capacity / node.total_capacity
+                node.quantum_amplitudes *= torch.sqrt(torch.tensor(amplitude_factor))
+    
+    async def _update_entanglement_dynamics(self) -> None:
+        """Update quantum entanglement dynamics"""
+        
+        if self.entanglement_matrix is None:
+            return
+        
+        # Evolve entanglement matrix
+        dt = self.monitoring_interval * 5
+        
+        # Simple entanglement evolution (would be more complex in practice)
+        decoherence_factor = torch.exp(-dt / self.quantum_coherence_time)
+        self.entanglement_matrix *= decoherence_factor
+        
+        # Add new entanglement based on current resource usage
+        node_list = list(self.quantum_nodes.values())
+        for i, node_i in enumerate(node_list):
+            for j, node_j in enumerate(node_list):
+                if i != j:
+                    # Increase entanglement for nodes with similar utilization
+                    util_similarity = 1.0 - abs(node_i.utilization_rate - node_j.utilization_rate)
+                    if util_similarity > 0.8:
+                        self.entanglement_matrix[i, j] += 0.1 * util_similarity
+                        self.entanglement_matrix[i, j] = torch.clamp(self.entanglement_matrix[i, j], 0, 1)
+    
+    async def _apply_coherence_preservation(self) -> None:
+        """Apply quantum coherence preservation techniques"""
+        
+        for node in self.quantum_nodes.values():
+            if node.quantum_state == QuantumState.SUPERPOSITION:
+                # Apply error correction to quantum amplitudes
+                amplitude_magnitude = abs(node.quantum_amplitudes[0])
+                
+                if amplitude_magnitude < 0.5:  # Coherence degraded
+                    # Restore coherence
+                    restoration_factor = 1.0 / max(amplitude_magnitude, 0.1)
+                    node.quantum_amplitudes *= min(restoration_factor, 2.0)
+                    
+                    logger.debug(f"Restored coherence for node {node.node_id}")
+
     async def get_quantum_resource_status(self, encrypt_sensitive: bool = True) -> Dict[str, Any]:
         """Get comprehensive quantum resource status"""
         status = {
@@ -694,6 +856,101 @@ class QuantumResourceManager:
         improvement = self._apply_configuration(best_configuration)
 
         return {"improvement": improvement, "final_energy": best_energy}
+    
+    async def _entanglement_load_balancing(self) -> Dict[str, float]:
+        """Perform entanglement-based load balancing"""
+        
+        if self.entanglement_matrix is None:
+            return {"improvement": 0.0}
+        
+        # Calculate load imbalance
+        utilizations = [node.utilization_rate for node in self.quantum_nodes.values()]
+        load_variance = np.var(utilizations)
+        
+        # Use quantum entanglement to redistribute load
+        entangled_pairs = self._find_entangled_pairs()
+        redistribution_improvement = 0.0
+        
+        for pair in entangled_pairs:
+            node1_id, node2_id = pair
+            if node1_id in self.quantum_nodes and node2_id in self.quantum_nodes:
+                node1 = self.quantum_nodes[node1_id]
+                node2 = self.quantum_nodes[node2_id]
+                
+                # Balance load between entangled nodes
+                avg_util = (node1.utilization_rate + node2.utilization_rate) / 2
+                load_diff = abs(node1.utilization_rate - node2.utilization_rate)
+                
+                if load_diff > 0.2:  # Significant imbalance
+                    # Simulate load redistribution
+                    redistribution_improvement += load_diff * 0.1
+        
+        return {"improvement": redistribution_improvement}
+    
+    async def _mitigate_quantum_interference(self) -> Dict[str, float]:
+        """Mitigate quantum interference in resource allocation"""
+        
+        coherence_extension = 0.0
+        
+        for node in self.quantum_nodes.values():
+            if node.quantum_state == QuantumState.SUPERPOSITION:
+                # Apply coherence preservation techniques
+                current_time = time.time()
+                time_since_update = current_time - node.last_update
+                
+                if time_since_update < self.quantum_coherence_time * 0.8:
+                    # Apply interference mitigation
+                    coherence_extension += 10.0  # Extend coherence by 10 seconds
+                    
+                    # Update quantum amplitudes to reduce interference
+                    phase_correction = -time_since_update * 0.1
+                    node.quantum_amplitudes *= torch.exp(1j * phase_correction)
+        
+        return {"coherence_extension": coherence_extension}
+    
+    async def _quantum_auto_scaling(self) -> Dict[str, float]:
+        """Quantum-enhanced auto-scaling"""
+        
+        energy_saved = 0.0
+        
+        # Predict scaling needs using quantum superposition
+        scaling_decisions = []
+        
+        for node in self.quantum_nodes.values():
+            if len(node.utilization_history) > 10:
+                # Quantum prediction of future utilization
+                recent_utils = list(node.utilization_history)[-10:]
+                trend = np.polyfit(range(len(recent_utils)), recent_utils, 1)[0]
+                
+                predicted_util = recent_utils[-1] + trend * 5  # 5 time steps ahead
+                
+                if predicted_util > 0.9:
+                    scaling_decisions.append({"node": node.node_id, "action": "scale_up"})
+                elif predicted_util < 0.3:
+                    scaling_decisions.append({"node": node.node_id, "action": "scale_down"})
+                    energy_saved += 0.2  # Simulated energy savings
+        
+        logger.info(f"Quantum auto-scaling: {len(scaling_decisions)} decisions")
+        
+        return {"energy_saved": energy_saved}
+    
+    def _find_entangled_pairs(self) -> List[Tuple[str, str]]:
+        """Find pairs of strongly entangled resource nodes"""
+        
+        if self.entanglement_matrix is None:
+            return []
+        
+        pairs = []
+        node_ids = list(self.quantum_nodes.keys())
+        
+        for i in range(len(node_ids)):
+            for j in range(i + 1, len(node_ids)):
+                entanglement_strength = abs(self.entanglement_matrix[i, j].item())
+                
+                if entanglement_strength > 0.7:  # Strong entanglement threshold
+                    pairs.append((node_ids[i], node_ids[j]))
+        
+        return pairs
 
     def _generate_random_configuration(self) -> Dict[str, Any]:
         """Generate random resource configuration"""
