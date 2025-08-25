@@ -1303,6 +1303,86 @@ class AdaptiveNoiseInjector:
             'privacy_params': privacy_params.copy()
         })
 
+class PrivacyAmplificationEngine:
+    """Main interface for quantum privacy amplification with unified orchestration"""
+    
+    def __init__(self, config: Optional[PrivacyAmplificationConfig] = None):
+        self.config = config or PrivacyAmplificationConfig()
+        self.adaptive_amplifier = AdaptiveQuantumPrivacyAmplifier(self.config)
+        
+        # Generation 4 integrations
+        self.orchestrator_integration = True
+        self.unified_quantum_metrics = {}
+        self.breakthrough_mode = True
+        
+        # Performance tracking
+        self.amplification_times = []
+        self.privacy_scores = []
+        self.utility_scores = []
+        
+        logger.info("🔐 PrivacyAmplificationEngine v6.0 initialized")
+        logger.info(f"Target privacy: {self.config.target_privacy_level} bits")
+        logger.info(f"Max parties: {self.config.max_parties}")
+    
+    def amplify_privacy(self, shared_secrets: List[torch.Tensor], 
+                       public_randomness: torch.Tensor,
+                       graph_data: Optional[Dict[str, torch.Tensor]] = None) -> Tuple[torch.Tensor, Dict[str, Any]]:
+        """Main privacy amplification interface"""
+        
+        start_time = time.time()
+        
+        try:
+            # Basic privacy amplification
+            amplified_secret, security_metrics = self.adaptive_amplifier.adaptive_privacy_amplification(
+                torch.zeros(1000, 128) if graph_data is None else graph_data.get('node_features', torch.zeros(1000, 128)),
+                torch.randint(0, 1000, (2, 4000)) if graph_data is None else graph_data.get('edge_index', torch.randint(0, 1000, (2, 4000))),
+                shared_secrets,
+                public_randomness
+            )
+            
+            amplification_time = time.time() - start_time
+            self.amplification_times.append(amplification_time)
+            
+            # Track performance metrics
+            self.privacy_scores.append(security_metrics.get('overall_security_score', 0.0))
+            
+            # Update unified metrics for orchestrator
+            self.unified_quantum_metrics = {
+                'privacy_amplification_factor': security_metrics.get('residual_information', 1e-15),
+                'security_level': security_metrics.get('quantum_security_level', 0.0),
+                'amplification_time': amplification_time,
+                'breakthrough_achieved': security_metrics.get('meets_target_privacy', False)
+            }
+            
+            logger.info(f"Privacy amplification completed in {amplification_time:.4f}s")
+            
+            return amplified_secret, security_metrics
+            
+        except Exception as e:
+            logger.error(f"Privacy amplification failed: {e}")
+            return torch.zeros(128), {'error': str(e)}
+    
+    def get_privacy_performance_report(self) -> Dict[str, Any]:
+        """Generate privacy performance report"""
+        
+        if not self.amplification_times:
+            return {'error': 'No amplification operations performed'}
+        
+        return {
+            'performance_metrics': {
+                'mean_amplification_time': np.mean(self.amplification_times),
+                'std_amplification_time': np.std(self.amplification_times),
+                'mean_privacy_score': np.mean(self.privacy_scores) if self.privacy_scores else 0.0,
+                'amplification_count': len(self.amplification_times)
+            },
+            'configuration': {
+                'target_privacy_level': self.config.target_privacy_level,
+                'max_parties': self.config.max_parties,
+                'amplification_factor': self.config.amplification_factor
+            },
+            'unified_quantum_metrics': self.unified_quantum_metrics
+        }
+
 class PublicChannel:
     """Simulated public communication channel"""
     
