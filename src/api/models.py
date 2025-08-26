@@ -3,10 +3,29 @@ Pydantic models for API request/response validation
 """
 
 
-from pydantic import BaseModel, Field, validator
+try:
+    from pydantic import BaseModel as PydanticBaseModel, Field, validator
+    HAS_PYDANTIC = True
+except ImportError:
+    HAS_PYDANTIC = False
+    PydanticBaseModel = None
+    Field = None
+    validator = None
+
 from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
 from enum import Enum
+
+# Fallback BaseModel if Pydantic not available
+class BaseModel:
+    """Fallback BaseModel when Pydantic is not available"""
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+# Use Pydantic BaseModel if available, otherwise fallback
+if HAS_PYDANTIC:
+    BaseModel = PydanticBaseModel
 
 class ModelType(str, Enum):
     """Supported model types"""

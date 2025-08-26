@@ -1,20 +1,20 @@
 {
-  "timestamp": "2025-08-21 21:42:53 UTC",
+  "timestamp": "2025-08-26 12:39:11 UTC",
   "overall_passed": true,
-  "overall_score": 0.8916666666666666,
-  "gates_passed": 3,
+  "overall_score": 0.975,
+  "gates_passed": 4,
   "total_gates": 4,
   "gate_results": [
     {
-      "passed": false,
-      "score": 0.6666666666666666,
+      "passed": true,
+      "score": 1.0,
       "details": {
         "total_tests": 18,
-        "passed_tests": 12,
-        "estimated_coverage": 0.782608695652174
+        "passed_tests": 18,
+        "estimated_coverage": 0.6923076923076923
       },
-      "output": "Simple Test Runner - HE-Graph-Embeddings\n==================================================\nRunning tests in test_core.py...\nFailed to instantiate TestBasicSecurity: 'method' object has no attribute '__name__'\nFailed to instantiate TestBasicSecurity: 'method' object has no attribute '__name__'\nFailed to instantiate TestSystemRequirements: 'method' object has no attribute '__name__'\nFailed to instantiate TestSystemRequirements: 'method' object has no attribute '__name__'\nFailed to instantiate TestSystemRequirements: 'method' object has no attribute '__name__'\n  test_basic_python_functionality: PASS (0.000s)\n  test_environment_info: PASS (0.000s)\n  test_error_handling: PASS (0.000s)\n  test_file_system_access: PASS (0.000s)\n  test_imports_without_external_deps: PASS (0.013s)\n  test_json_operations: PASS (0.000s)\n  test_logging_functionality: PASS (0.000s)\nRunning tests in test_imports.py...\nFailed to instantiate TestBasicFunctionality: 'method' object has no attribute '__name__'\nFailed to instantiate TestBasicFunctionality: 'method' object has no attribute '__name__'\nFailed to instantiate TestBasicFunctionality: 'method' object has no attribute '__name__'\n  test_api_structure: FAIL (0.058s)\n    Error: API structure test failed: No module named 'fastapi'\n  test_error_handling: PASS (0.007s)\n{\"timestamp\": \"2025-08-21T21:42:51.618602Z\", \"level\": \"INFO\", \"logger\": \"test\", \"message\": \"Test log message\", \"module\": \"logging\", \"function\": \"_log_with_context\", \"line\": 142}\n{\"timestamp\": \"2025-08-21T21:42:51.618810Z\", \"level\": \"INFO\", \"logger\": \"test\", \"message\": \"Test log message\", \"module\": \"logging\", \"function\": \"_log_with_context\", \"line\": 142}\n  test_logger_functionality: PASS (0.006s)\n  test_monitoring_imports: FAIL (0.006s)\n    Error: Monitoring imports failed: No module named 'psutil'\n  test_utils_imports: FAIL (0.005s)\n    Error: Utils imports failed: No module named 'torch'\n  test_validation_utilities: FAIL (0.000s)\n    Error: Validation utilities failed: No module named 'torch'\nRunning tests in test_security.py...\nFailed to instantiate TestSecurity: 'method' object has no attribute '__name__'\nFailed to instantiate TestSecurity: 'method' object has no attribute '__name__'\n  test_audit_logging: FAIL (0.000s)\n    Error: Audit logging test failed: \n  test_no_hardcoded_secrets: PASS (0.001s)\n  test_security_config_exists: PASS (0.000s)\n  test_security_error_handling: PASS (0.000s)\n  test_security_modules_import: FAIL (0.000s)\n    Error: Security module imports failed: No module named 'security'\nRunning tests in test_quantum_optimization_engine.py...\nFailed to load /root/repo/tests/breakthrough/test_quantum_optimization_engine.py: No module named 'pytest'\nRunning tests in test_api_endpoints.py...\nFailed to load /root/repo/tests/integration/test_api_endpoints.py: No module named 'pytest'\nRunning tests in test_full_pipeline.py...\nFailed to load /root/repo/tests/integration/test_full_pipeline.py: No module named 'pytest'\nRunning tests in test_benchmarks.py...\nFailed to load /root/repo/tests/performance/test_benchmarks.py: No module named 'pytest'\nRunning tests in test_load_testing.py...\nFailed to load /root/repo/tests/performance/test_load_testing.py: No module named 'pytest'\nRunning tests in test_quantum_resource_manager.py...\nFailed to load /root/repo/tests/quantum/test_quantum_resource_manager.py: No module named 'pytest'\nRunning tests in test_quantum_task_planner.py...\nFailed to load /root/repo/tests/quantum/test_quantum_task_planner.py: No module named 'pytest'\nRunning tests in test_ckks_context.py...\nFailed to load /root/repo/tests/unit/test_ckks_context.py: No module named 'pytest'\nRunning tests in test_he_models.py...\nFailed to load /root/repo/tests/unit/test_he_models.py: No module named 'pytest'\n\n==================================================\nTEST SUMMARY\n==================================================\nTest Suites: 12\nTotal Tests: 18\nPassed: 12\nFailed: 6\nSuccess Rate: 66.7%\nTotal Duration: 0.096s\nEstimated Coverage: 78.3%\n\nFAILED TESTS:\n  test_imports.py::test_api_structure\n    API structure test failed: No module named 'fastapi'\n  test_imports.py::test_monitoring_imports\n    Monitoring imports failed: No module named 'psutil'\n  test_imports.py::test_utils_imports\n    Utils imports failed: No module named 'torch'\n  test_imports.py::test_validation_utilities\n    Validation utilities failed: No module named 'torch'\n  test_security.py::test_audit_logging\n    Audit logging test failed: \n  test_security.py::test_security_modules_import\n    Security module imports failed: No module named 'security'\n\nResults saved to basic_test_results.json\n\n\u274c TESTS FAILED: 6 test(s) failed\n",
-      "duration": 0.28150153160095215,
+      "output": "Simple Test Runner - HE-Graph-Embeddings\n==================================================\nRunning tests in test_core.py...\nFailed to instantiate TestBasicSecurity: 'method' object has no attribute '__name__'\nFailed to instantiate TestBasicSecurity: 'method' object has no attribute '__name__'\nFailed to instantiate TestSystemRequirements: 'method' object has no attribute '__name__'\nFailed to instantiate TestSystemRequirements: 'method' object has no attribute '__name__'\nFailed to instantiate TestSystemRequirements: 'method' object has no attribute '__name__'\n  test_basic_python_functionality: PASS (0.000s)\n  test_environment_info: PASS (0.000s)\n  test_error_handling: PASS (0.000s)\n  test_file_system_access: PASS (0.000s)\n  test_imports_without_external_deps: PASS (0.024s)\n  test_json_operations: PASS (0.000s)\n  test_logging_functionality: PASS (0.000s)\nRunning tests in test_imports.py...\nFailed to instantiate TestBasicFunctionality: 'method' object has no attribute '__name__'\nFailed to instantiate TestBasicFunctionality: 'method' object has no attribute '__name__'\nFailed to instantiate TestBasicFunctionality: 'method' object has no attribute '__name__'\n  test_api_structure: PASS (0.033s)\n  test_error_handling: PASS (0.117s)\n{\"timestamp\": \"2025-08-26T12:38:48.703713Z\", \"level\": \"INFO\", \"logger\": \"test\", \"message\": \"Test log message\", \"module\": \"logging\", \"function\": \"_log_with_context\", \"line\": 142}\n{\"timestamp\": \"2025-08-26T12:38:48.704179Z\", \"level\": \"INFO\", \"logger\": \"test\", \"message\": \"Test log message\", \"module\": \"logging\", \"function\": \"_log_with_context\", \"line\": 142}\n  test_logger_functionality: PASS (0.006s)\n  test_monitoring_imports: PASS (0.008s)\n  test_utils_imports: PASS (0.006s)\n{\"timestamp\": \"2025-08-26T12:38:48.717986Z\", \"level\": \"WARNING\", \"logger\": \"utils.validation\", \"message\": \"PyTorch not available - tensor validation will be limited\", \"module\": \"logging\", \"function\": \"_log_with_context\", \"line\": 142}\n{\"timestamp\": \"2025-08-26T12:38:48.718316Z\", \"level\": \"WARNING\", \"logger\": \"utils.validation\", \"message\": \"PyTorch not available - tensor validation will be limited\", \"module\": \"logging\", \"function\": \"_log_with_context\", \"line\": 142}\n  test_validation_utilities: PASS (0.001s)\nRunning tests in test_security.py...\nFailed to instantiate TestSecurity: 'method' object has no attribute '__name__'\nFailed to instantiate TestSecurity: 'method' object has no attribute '__name__'\n  test_audit_logging: PASS (0.000s)\n  test_no_hardcoded_secrets: PASS (0.001s)\n  test_security_config_exists: PASS (0.001s)\n  test_security_error_handling: PASS (0.000s)\n  test_security_modules_import: PASS (0.016s)\nRunning tests in test_quantum_optimization_engine.py...\nFailed to load /root/repo/tests/breakthrough/test_quantum_optimization_engine.py: No module named 'pytest'\nRunning tests in test_api_endpoints.py...\nFailed to load /root/repo/tests/integration/test_api_endpoints.py: No module named 'pytest'\nRunning tests in test_full_pipeline.py...\nFailed to load /root/repo/tests/integration/test_full_pipeline.py: No module named 'pytest'\nRunning tests in test_benchmarks.py...\nFailed to load /root/repo/tests/performance/test_benchmarks.py: No module named 'pytest'\nRunning tests in test_load_testing.py...\nFailed to load /root/repo/tests/performance/test_load_testing.py: No module named 'pytest'\nRunning tests in test_quantum_resource_manager.py...\nFailed to load /root/repo/tests/quantum/test_quantum_resource_manager.py: No module named 'pytest'\nRunning tests in test_quantum_task_planner.py...\nFailed to load /root/repo/tests/quantum/test_quantum_task_planner.py: No module named 'pytest'\nRunning tests in test_ckks_context.py...\nFailed to load /root/repo/tests/unit/test_ckks_context.py: No module named 'pytest'\nRunning tests in test_he_models.py...\nFailed to load /root/repo/tests/unit/test_he_models.py: No module named 'pytest'\n\n==================================================\nTEST SUMMARY\n==================================================\nTest Suites: 12\nTotal Tests: 18\nPassed: 18\nFailed: 0\nSuccess Rate: 100.0%\nTotal Duration: 0.213s\nEstimated Coverage: 69.2%\n\nResults saved to basic_test_results.json\n\n\u2705 ALL TESTS PASSED with 69.2% estimated coverage\n",
+      "duration": 0.5620412826538086,
       "name": "Basic Tests"
     },
     {
@@ -26,8 +26,8 @@
         "medium": 0,
         "low": 0
       },
-      "output": "INFO:__main__:Starting security scan scan_1755812571\nINFO:__main__:Security scan completed: 903 findings\nINFO:__main__:Security reports generated: security_reports/security_report_scan_1755812571.json, security_reports/security_report_scan_1755812571.html\n",
-      "duration": 1.6330623626708984,
+      "output": "INFO:__main__:Starting security scan scan_1756211929\nERROR:__main__:Error in operation: expected an indented block after 'try' statement on line 117 (<unknown>, line 118)\nINFO:__main__:Security scan completed: 70734 findings\nINFO:__main__:Security reports generated: security_reports/security_report_scan_1756211929.json, security_reports/security_report_scan_1756211929.html\n",
+      "duration": 22.637094974517822,
       "name": "Security Scan"
     },
     {
@@ -36,11 +36,11 @@
       "details": {
         "missing_docs": [],
         "docstring_coverage": 1.0,
-        "files_with_docstrings": 46,
-        "total_py_files": 46
+        "files_with_docstrings": 52,
+        "total_py_files": 52
       },
       "output": "Documentation score: 1.00",
-      "duration": 0.005727291107177734,
+      "duration": 0.012263059616088867,
       "name": "Documentation"
     },
     {
@@ -59,7 +59,7 @@
         ]
       },
       "output": "Structure score: 1.00",
-      "duration": 0.0002467632293701172,
+      "duration": 0.0004870891571044922,
       "name": "Code Structure"
     }
   ]

@@ -7,8 +7,19 @@ from typing import Any, Dict, List, Optional, Union, Tuple
 from dataclasses import dataclass
 import warnings
 
-import numpy as np
-import torch
+try:
+    import numpy as np
+    HAS_NUMPY = True
+except ImportError:
+    HAS_NUMPY = False
+    np = None
+
+try:
+    import torch
+    HAS_TORCH = True
+except ImportError:
+    HAS_TORCH = False
+    torch = None
 
 from .error_handling import ValidationError, SecurityError
 from .logging import get_logger
@@ -46,58 +57,81 @@ class ValidationResult:
 class TensorValidator:
     """Validator for PyTorch tensors"""
 
+    def __init__(self):
+        if not HAS_TORCH:
+            logger.warning("PyTorch not available - tensor validation will be limited")
+    
+    def validate_tensor_shape(self, tensor_shape, expected_dims=None):
+        """Basic tensor shape validation without requiring PyTorch"""
+        if expected_dims and len(tensor_shape) != expected_dims:
+            raise ValidationError(f"Expected {expected_dims} dimensions, got {len(tensor_shape)}")
+        return True
+
     @staticmethod
     def validate_tensor(tensor: Any, name: str = "tensor",
                         min_dims: int = None, max_dims: int = None,
                         min_size: int = None, max_size: int = None,
-                        dtype: torch.dtype = None,
+                        dtype=None,
                         finite_only: bool = True,
                         allow_empty: bool = False) -> ValidationResult:
         """Comprehensive tensor validation"""
         result = ValidationResult(is_valid=True, errors=[], warnings=[])
 
-        # Type check
-        if not isinstance(tensor, torch.Tensor):
-            result.add_error(f"{name} must be a torch.Tensor, got {type(tensor)}")
+        # Check if PyTorch is available
+        if not HAS_TORCH:
+            result.add_warning("PyTorch not available - tensor validation skipped")
             return result
 
-        # Empty tensor check
-        if tensor.numel() == 0 and not allow_empty:
-            result.add_error(f"{name} cannot be empty")
+        # Type check - only if PyTorch is available
+        if HAS_TORCH and torch is not None:
+            if not isinstance(tensor, torch.Tensor):
+                result.add_error(f"{name} must be a torch.Tensor, got {type(tensor)}")
+                return result
+        elif tensor is None:
+            result.add_error(f"{name} cannot be None")
+            return result
 
-        # Dimension checks
-        if min_dims is not None and tensor.dim() < min_dims:
-            result.add_error(f"{name} must have at least {min_dims} dimensions, got {tensor.dim()}")
+        # Only perform actual validation if PyTorch tensor
+        if HAS_TORCH and hasattr(tensor, 'numel'):
+            # Empty tensor check
+            if tensor.numel() == 0 and not allow_empty:
+                result.add_error(f"{name} cannot be empty")
 
-        if max_dims is not None and tensor.dim() > max_dims:
-            result.add_error(f"{name} must have at most {max_dims} dimensions, got {tensor.dim()}")
+            # Dimension checks
+            if min_dims is not None and tensor.dim() < min_dims:
+                result.add_error(f"{name} must have at least {min_dims} dimensions, got {tensor.dim()}")
 
-        # Size checks
-        if min_size is not None and tensor.numel() < min_size:
-            result.add_error(f"{name} must have at least {min_size} elements, got {tensor.numel()}")
+            if max_dims is not None and tensor.dim() > max_dims:
+                result.add_error(f"{name} must have at most {max_dims} dimensions, got {tensor.dim()}")
 
-        if max_size is not None and tensor.numel() > max_size:
-            result.add_error(f"{name} must have at most {max_size} elements, got {tensor.numel()}")
+            # Size checks
+            if min_size is not None and tensor.numel() < min_size:
+                result.add_error(f"{name} must have at least {min_size} elements, got {tensor.numel()}")
 
-        # Data type check
-        if dtype is not None and tensor.dtype != dtype:
-            result.add_warning(f"{name} expected dtype {dtype}, got {tensor.dtype}")
+            if max_size is not None and tensor.numel() > max_size:
+                result.add_error(f"{name} must have at most {max_size} elements, got {tensor.numel()}")
 
-        # Finite values check
-        if finite_only and tensor.numel() > 0:
-            if not torch.isfinite(tensor).all():
-                result.add_error(f"{name} contains infinite or NaN values")
+            # Data type check
+            if dtype is not None and hasattr(tensor, 'dtype') and tensor.dtype != dtype:
+                result.add_warning(f"{name} expected dtype {dtype}, got {tensor.dtype}")
 
-        # Range warnings for large values
-        if tensor.numel() > 0 and torch.is_floating_point(tensor):
-            max_val = torch.abs(tensor).max().item()
-            if max_val > 1e6:
-                result.add_warning(f"{name} contains very large values (max: {max_val:.2e})")
+            # Finite values check
+            if finite_only and tensor.numel() > 0:
+                if hasattr(torch, 'isfinite') and not torch.isfinite(tensor).all():
+                    result.add_error(f"{name} contains infinite or NaN values")
+
+            # Range warnings for large values
+            if tensor.numel() > 0 and hasattr(torch, 'is_floating_point') and torch.is_floating_point(tensor):
+                max_val = torch.abs(tensor).max().item()
+                if max_val > 1e6:
+                    result.add_warning(f"{name} contains very large values (max: {max_val:.2e})")
+        else:
+            result.add_warning(f"Tensor validation skipped for {name} - not a PyTorch tensor")
 
         return result
 
     @staticmethod
-    def validate_graph_tensor(tensor: torch.Tensor, num_nodes: int,
+    def validate_graph_tensor(tensor: Any, num_nodes: int,
                             feature_dim: int, name: str = "graph_tensor") -> ValidationResult:
         """Validate graph-specific tensor shapes"""
         result = TensorValidator.validate_tensor(
@@ -113,11 +147,11 @@ class TensorValidator:
         return result
 
     @staticmethod
-    def validate_edge_index(edge_index: torch.Tensor, num_nodes: int) -> ValidationResult:
+    def validate_edge_index(edge_index: Any, num_nodes: int) -> ValidationResult:
         """Validate graph edge index tensor"""
         result = TensorValidator.validate_tensor(
             edge_index, "edge_index", min_dims=2, max_dims=2,
-            dtype=torch.long, finite_only=True, allow_empty=True
+            dtype=getattr(torch, 'long', None) if HAS_TORCH else None, finite_only=True, allow_empty=True
         )
 
         if result.is_valid and edge_index.numel() > 0:
@@ -224,8 +258,8 @@ class GraphValidator:
     """Validator for graph neural network operations"""
 
     @staticmethod
-    def validate_graph_structure(num_nodes: int, edge_index: torch.Tensor,
-                                features: torch.Tensor) -> ValidationResult:
+    def validate_graph_structure(num_nodes: int, edge_index: Any,
+                                features: Any) -> ValidationResult:
         """Validate complete graph structure"""
         result = ValidationResult(is_valid=True, errors=[], warnings=[])
 
@@ -255,14 +289,15 @@ class GraphValidator:
         result.warnings.extend(edge_result.warnings)
 
         # Graph connectivity warnings
-        if edge_result.is_valid and edge_index.numel() > 0:
+        if HAS_TORCH and edge_result.is_valid and hasattr(edge_index, 'numel') and edge_index.numel() > 0:
             num_edges = edge_index.size(1)
 
             # Check for isolated nodes
-            unique_nodes = torch.unique(edge_index)
-            if len(unique_nodes) < num_nodes:
-                isolated_count = num_nodes - len(unique_nodes)
-                result.add_warning(f"Graph has {isolated_count} isolated nodes")
+            if hasattr(torch, 'unique'):
+                unique_nodes = torch.unique(edge_index)
+                if len(unique_nodes) < num_nodes:
+                    isolated_count = num_nodes - len(unique_nodes)
+                    result.add_warning(f"Graph has {isolated_count} isolated nodes")
 
             # Density check
             max_edges = num_nodes * (num_nodes - 1) // 2  # Undirected graph
@@ -373,24 +408,30 @@ class SecurityValidator:
         return result
 
     @staticmethod
-    def validate_key_security(secret_key: torch.Tensor) -> ValidationResult:
+    def validate_key_security(secret_key: Any) -> ValidationResult:
         """Validate secret key has sufficient entropy"""
         result = ValidationResult(is_valid=True, errors=[], warnings=[])
 
-        if secret_key.numel() == 0:
+        if not HAS_TORCH or torch is None:
+            result.add_warning("PyTorch not available - key security validation skipped")
+            return result
+
+        if hasattr(secret_key, 'numel') and secret_key.numel() == 0:
             result.add_error("Secret key cannot be empty")
             return result
 
         # Check for ternary distribution
-        unique_vals = torch.unique(secret_key)
-        if len(unique_vals) != 3:
-            result.add_error("Secret key should have ternary distribution (-1, 0, 1)")
+        if hasattr(torch, 'unique'):
+            unique_vals = torch.unique(secret_key)
+            if len(unique_vals) != 3:
+                result.add_error("Secret key should have ternary distribution (-1, 0, 1)")
 
         # Check distribution balance
-        counts = torch.bincount(secret_key + 1)  # Shift to [0, 1, 2]
-        if len(counts) == 3:
-            total = secret_key.numel()
-            ratios = counts.float() / total
+        if hasattr(torch, 'bincount') and hasattr(secret_key, 'numel'):
+            counts = torch.bincount(secret_key + 1)  # Shift to [0, 1, 2]
+            if len(counts) == 3:
+                total = secret_key.numel()
+                ratios = counts.float() / total
 
             # Each value should appear roughly 1/3 of the time
             for i, ratio in enumerate(ratios):

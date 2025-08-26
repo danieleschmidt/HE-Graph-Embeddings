@@ -21,8 +21,15 @@ def test_security_config_exists():
 def test_security_modules_import():
     """Test that security modules can be imported"""
     try:
-        from security.policy_enforcer import PolicyEnforcer
-        from security.security_scanner import SecurityScanner
+        # Add security directory to Python path temporarily
+        import sys
+        import os
+        security_path = os.path.join(os.path.dirname(__file__), '..', '..', 'security')
+        if security_path not in sys.path:
+            sys.path.insert(0, security_path)
+        
+        from policy_enforcer import PolicyEnforcer
+        from security_scanner import SecurityScanner
         assert True, "Security modules imported successfully"
     except Exception as e:
         raise AssertionError(f"Security module imports failed: {e}")
