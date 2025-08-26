@@ -9,6 +9,7 @@ Classes:
     None (FastAPI router-based module)
 
 Functions:
+    health_check: Basic health status check (standalone)
     basic_health_check: Basic health status endpoint
     detailed_health_check: Comprehensive system health with all subsystems
     get_metrics: Current system performance metrics
@@ -37,52 +38,83 @@ Example:
 import asyncio
 from datetime import datetime
 from typing import Dict, Any, List
-from fastapi import APIRouter, HTTPException, Depends
-from fastapi.responses import JSONResponse
-import torch
+
+try:
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi.responses import JSONResponse
+    HAS_FASTAPI = True
+except ImportError:
+    HAS_FASTAPI = False
+    APIRouter = None
+    HTTPException = None
+    Depends = None
+
+try:
+    import torch
+    HAS_TORCH = True
+except ImportError:
+    HAS_TORCH = False
+    torch = None
 
 from ..utils.monitoring import get_health_checker, HealthStatus, HealthCheckResult
 from ..utils.logging import get_logger, log_context
 from ..utils.error_handling import handle_exceptions, HEGraphError
 
 logger = get_logger(__name__)
-router = APIRouter(prefix="/health", tags=["health"])
 
-@router.get("/", summary="Basic health check")
-@handle_exceptions(default_return=JSONResponse(
-    status_code=503,
-    content={"status": "unhealthy", "message": "Health check failed"}
-))
-async def basic_health_check():
+def health_check():
     """
-    Basic health check endpoint.
-
-    Returns simple service status without detailed diagnostics.
-    Suitable for load balancer health checks.
-
+    Standalone health check function that doesn't require FastAPI.
+    
     Returns:
-        dict: Status response with timestamp and service identifier
-
-    Response format:
-        {
-            "status": "healthy",
-            "timestamp": "2024-01-15T10:30:00.000Z",
-            "service": "he-graph-embeddings"
-        }
+        dict: Basic health status
     """
-    with log_context(operation="health_check_basic"):
-        return {
-            "status": "healthy",
-            "timestamp": datetime.utcnow().isoformat(),
-            "service": "he-graph-embeddings"
-        }
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "service": "he-graph-embeddings",
+        "version": "1.0.0"
+    }
 
-@router.get("/detailed", summary="Detailed health check")
-@handle_exceptions(reraise_as=HTTPException)
-async def detailed_health_check():
-    """Comprehensive health check with all subsystem status"""
-    with log_context(operation="health_check_detailed"):
-        try:
+# Only create router if FastAPI is available
+router = APIRouter(prefix="/health", tags=["health"]) if HAS_FASTAPI else None
+
+if HAS_FASTAPI and router:
+    @router.get("/", summary="Basic health check")
+    @handle_exceptions(default_return=JSONResponse(
+        status_code=503,
+        content={"status": "unhealthy", "message": "Health check failed"}
+    ))
+    async def basic_health_check():
+        """
+        Basic health check endpoint.
+
+        Returns simple service status without detailed diagnostics.
+        Suitable for load balancer health checks.
+
+        Returns:
+            dict: Status response with timestamp and service identifier
+
+        Response format:
+            {
+                "status": "healthy",
+                "timestamp": "2024-01-15T10:30:00.000Z",
+                "service": "he-graph-embeddings"
+            }
+        """
+        with log_context(operation="health_check_basic"):
+            return {
+                "status": "healthy",
+                "timestamp": datetime.utcnow().isoformat(),
+                "service": "he-graph-embeddings"
+            }
+
+    @router.get("/detailed", summary="Detailed health check")
+    @handle_exceptions(reraise_as=HTTPException)
+    async def detailed_health_check():
+        """Comprehensive health check with all subsystem status"""
+        with log_context(operation="health_check_detailed"):
+            try:
             health_checker = get_health_checker()
             if not health_checker:
                 raise HEGraphError("Health checker not initialized")

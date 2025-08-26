@@ -5,8 +5,6 @@ Comprehensive monitoring and health check utilities
 
 import asyncio
 import time
-import psutil
-import torch
 from typing import Dict, Any, List, Optional, Callable
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta
@@ -15,6 +13,20 @@ import threading
 import json
 from collections import defaultdict, deque
 import gc
+
+try:
+    import psutil
+    HAS_PSUTIL = True
+except ImportError:
+    HAS_PSUTIL = False
+    psutil = None
+
+try:
+    import torch
+    HAS_TORCH = True
+except ImportError:
+    HAS_TORCH = False
+    torch = None
 
 from .logging import get_logger, performance_context
 

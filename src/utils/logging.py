@@ -385,6 +385,9 @@ def get_audit_logger():
 security_logger = None
 audit_logger = None
 
+# Create global instance for import compatibility
+audit_logger = get_audit_logger()
+
 def setup_logging(log_level: str = "INFO", log_dir: str = "logs"):
     """Setup global logging configuration"""
     # Create log directory
